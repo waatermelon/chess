@@ -25,13 +25,28 @@ public class PieceCalculator {
         return moves;
     }
     private Collection<ChessMove> knightMoves(ChessPosition position) {
-
+        return new ArrayList<>();//TODO
     }
     private Collection<ChessMove> rookMoves(ChessPosition position) {
+        return new ArrayList<>();//TODO
 
     }
     private Collection<ChessMove> bishopMoves(ChessPosition position) {
-
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        /*
+        * - bishop travels on diagonals
+        * - from position
+        * calculate amount of squares on each side (left, right),
+        *  - right = (7 - position.column)
+        *  - left =  (7 - right)
+        *
+        * calculate square on top and bottom (up, down)
+        *  - up = (7 - position.row)
+        *  - down = (7 - up)
+        * loop through
+        *
+        * for each
+        * */
     }
     private Collection<ChessMove> kingMoves(ChessPosition position) {
         ArrayList<ChessMove> moves = new ArrayList<>();
@@ -44,7 +59,7 @@ public class PieceCalculator {
         return moves;
     }
     private Collection<ChessMove> queenMoves(ChessPosition position) {
-
+        return new ArrayList<>();//TODO
     }
 
     public static Collection<ChessMove> possibleMoves(ChessPiece.PieceType type, ChessGame.TeamColor teamColor, ChessPosition position) {
