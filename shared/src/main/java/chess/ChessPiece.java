@@ -59,8 +59,7 @@ public class ChessPiece {
         PieceType           type = board.getPiece(myPosition).getPieceType();
         ChessGame.TeamColor team = board.getPiece(myPosition).getTeamColor();
 
-
-
-        return new ArrayList<>();
+        PieceCalculator pc = new PieceCalculator(type, team, board);
+        return pc.possibleMoves(myPosition);
     }
 }

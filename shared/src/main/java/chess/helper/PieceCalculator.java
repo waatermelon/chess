@@ -1,9 +1,6 @@
 package chess.helper;
 
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,10 +9,12 @@ public class PieceCalculator {
 
     private final ChessPiece.PieceType type;
     private final ChessGame.TeamColor teamColor;
+    private final ChessBoard board;
 
-    public PieceCalculator(ChessPiece.PieceType type, ChessGame.TeamColor teamColor) {
+    public PieceCalculator(ChessPiece.PieceType type, ChessGame.TeamColor teamColor, ChessBoard board) {
         this.type = type;
         this.teamColor = teamColor;
+        this.board = board;
     }
 
 
@@ -26,74 +25,161 @@ public class PieceCalculator {
      * @param col       The column(x/j) movement. (-1, 0, 1)
      * @return          The possible moves based off of the given row and column directions.
      */
-    private Collection<ChessMove> directionalMove(ChessPosition position, int row, int col) {
-        ArrayList<int[]> moves = new ArrayList<>();
+    private ArrayList<ChessMove> directionalMove(ChessPosition position, int row, int col) {
+        int verticalDist = 0;
+        int horizontalDist = 0;
+        boolean rook = false;
+        if(row != 0) verticalDist = (row > 0) ? 8 - position.getRow(): position.getRow() - 1;
+        else rook = true;
+        if(col != 0) horizontalDist = (col > 0) ? 8 - position.getColumn(): position.getColumn() - 1;
+        else rook = true;
 
-        for(int i = position.getRow() + row; row != 0 && i < ((row > 0) ? 8 : -1); i += row)
-            moves.add(new int[]{0, i});
+        int[][] moves = new int[(rook) ? Math.max(verticalDist, horizontalDist) : Math.min(verticalDist, horizontalDist)][];
+        for(int i = 0; i < moves.length; ++i) {
+            moves[i] = new int[]{
+                    (rook) ? position.getRow() - 1 : (row > 0) ? 7 : 0,
+                    (rook) ? position.getColumn() - 1 : (col > 0) ? 7 : 0
+            };
+        }
 
-        for(int j = position.getColumn() + col, k = 0, l = 0; col != 0 && j < ((col > 0) ? 8 : -1); j += col) {
-            ++l;
-            if(moves.isEmpty()) k = 1;
-            if(k == 1)
-                moves.add(new int[]{j, 0});
-            else
-                moves.get(l)[0] = j;
+        for(int i = position.getRow() - 1 + row, j = 0; (j < moves.length) && (row != 0) && ((row > 0) ? (i < 8) : (i > -1)); i += row) {
+            moves[j][0] = i;
+            j++;
+        }
+        for(int i = position.getColumn() - 1 + col, j = 0; (j < moves.length) && (col != 0) && ((col > 0) ? (i < 8) : (i > -1)); i += col) {
+            moves[j][1] = i;
+            j++;
         }
 
         ArrayList<ChessMove> movesList = new ArrayList<>();
         for (int[] move : moves)
-            movesList.add(new ChessMove(position, new ChessPosition(move[1], move[0]), type));
+            movesList.add(new ChessMove(position, new ChessPosition(move[0] + 1, move[1] + 1), null));
 
+        return movesList;
+    }
+
+    private Collection<ChessMove> filterMoves(ArrayList<ChessMove> moves) {
+        ArrayList<ChessMove> movesList = new ArrayList<>();
+        for (ChessMove move : moves) {
+            ChessPiece other = board.getPiece(move.getEndPosition());
+            if (other != null && other.getTeamColor() != teamColor){
+                movesList.add(move);
+                break;
+            } else if (other != null) {
+                break;
+            }
+            movesList.add(move);
+        }
+
+        return movesList;
+    }
+
+    private Collection<ChessMove> removeIllegalMoves(Collection<ChessMove> moves) {
+        ArrayList<ChessMove> movesList = new ArrayList<>();
+        for (ChessMove move : moves) {
+            if (move.getEndPosition().getRow() > 8 || move.getEndPosition().getRow() < 1) continue;
+            if (move.getEndPosition().getColumn() > 8 || move.getEndPosition().getColumn() < 1) continue;
+
+            ChessPiece other = board.getPiece(move.getEndPosition());
+            if (other != null && other.getTeamColor() != teamColor) {
+                movesList.add(move);
+            } else if (other == null) {
+                movesList.add(move);
+            }
+        }
+
+        return movesList;
+    }
+
+    private Collection<ChessMove> removeIllegalMovesPawn(Collection<ChessMove> moves) {
+
+        ArrayList<ChessMove> movesList = new ArrayList<>();
+
+        for (ChessMove move : moves) {
+            if (move.getEndPosition().getRow() > 8 || move.getEndPosition().getRow() < 1) continue;
+            if (move.getEndPosition().getColumn() > 8 || move.getEndPosition().getColumn() < 1) continue;
+
+            ChessPiece other = board.getPiece(move.getEndPosition());
+            boolean diagonal = move.getStartPosition().getColumn() != move.getEndPosition().getColumn();
+
+            if (diagonal && other != null && other.getTeamColor() != teamColor) {
+                movesList.add(move);
+            } else if (!diagonal && other == null) {
+                movesList.add(move);
+            }
+        }
+        System.out.println(movesList);
+        return movesList;
+    }
+
+    private Collection<ChessMove> getPromotions(Collection<ChessMove> moves) {
+        ArrayList<ChessMove> movesList = new ArrayList<>();
+        for (ChessMove move: moves) {
+            if (move.getEndPosition().getRow() == 1 || move.getEndPosition().getRow() == 8) {
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.QUEEN));
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.BISHOP));
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.ROOK));
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.KNIGHT));
+            } else {
+                movesList.add(move);
+            }
+        }
         return movesList;
     }
 
     private Collection<ChessMove> pawnMoves(ChessPosition position) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         int yChange = (teamColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
-        moves.add(new ChessMove(position, new ChessPosition(position.getRow() + yChange, position.getColumn()), type));
-        return moves;
+        boolean doubleJump = teamColor == ChessGame.TeamColor.WHITE && position.getRow() == 2 || teamColor == ChessGame.TeamColor.BLACK && position.getRow() == 7;
+
+        for (int i = -1; i < 2; ++i)
+            moves.add(new ChessMove(position, new ChessPosition(position.getRow() + yChange, position.getColumn() + i), null));
+
+        if(doubleJump && board.getPiece(moves.get(1).getEndPosition()) == null) {
+            moves.add(new ChessMove(position, new ChessPosition(position.getRow() + (yChange * 2), position.getColumn()), null));
+        }
+        return getPromotions(removeIllegalMovesPawn(moves));
     }
 
     private Collection<ChessMove> knightMoves(ChessPosition position) {
         ArrayList<ChessMove> moves = new ArrayList<>();
-        for(int i = 0; i < 4; ++i) {
-            for(int j = -1; j < 1; ++j) {
-
-            }
+        for (int i = 0, j = 2, k = 1; i < 8; ++i) {
+            moves.add(new ChessMove(position, new ChessPosition(position.getRow() + j, position.getColumn() + k*((Math.abs(j) == 1) ? 2 : 1)), null));
+            k *= -1;
+            if (i % 2 == 1) j *= -1;
+            if (i == 3) j = 1;
         }
-
-        return moves;
+        return removeIllegalMoves(moves);
     }
 
     private Collection<ChessMove> rookMoves(ChessPosition position) {
         ArrayList<ChessMove> moves = new ArrayList<>();
-        moves.addAll(directionalMove(position, 0, -1));
-        moves.addAll(directionalMove(position, 0, 1));
-        moves.addAll(directionalMove(position, -1, 0));
-        moves.addAll(directionalMove(position, -1, 0));
+        moves.addAll(filterMoves(directionalMove(position, 0, -1)));
+        moves.addAll(filterMoves(directionalMove(position, 0, 1)));
+        moves.addAll(filterMoves(directionalMove(position, -1, 0)));
+        moves.addAll(filterMoves(directionalMove(position, 1, 0)));
 
         return moves;
     }
 
     private Collection<ChessMove> bishopMoves(ChessPosition position) {
         ArrayList<ChessMove> moves = new ArrayList<>();
-        moves.addAll(directionalMove(position, 1, -1));
-        moves.addAll(directionalMove(position, 1, 1));
-        moves.addAll(directionalMove(position, -1, -1));
-        moves.addAll(directionalMove(position, -1, 1));
+        moves.addAll(filterMoves(directionalMove(position, 1, -1)));
+        moves.addAll(filterMoves(directionalMove(position, 1, 1)));
+        moves.addAll(filterMoves(directionalMove(position, -1, -1)));
+        moves.addAll(filterMoves(directionalMove(position, -1, 1)));
 
         return moves;
     }
     private Collection<ChessMove> kingMoves(ChessPosition position) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         for(int i = -1; i < 2; ++i) {
-            for(int j = -1; j < 2; ++j) {
-                if(i == 0 && j == 0) continue;
-                moves.add(new ChessMove(position, new ChessPosition(position.getRow() + i, position.getColumn() + j), type));
+            for (int j = -1; j < 2; ++j) {
+                if (i == 0 && j == 0) continue;
+                moves.add(new ChessMove(position, new ChessPosition(position.getRow() + i, position.getColumn() + j), null));
             }
         }
-        return moves;
+        return removeIllegalMoves(moves);
     }
     private Collection<ChessMove> queenMoves(ChessPosition position) {
         ArrayList<ChessMove> moves = new ArrayList<>();
@@ -103,8 +189,8 @@ public class PieceCalculator {
         return moves;
     }
 
-    public static Collection<ChessMove> possibleMoves(ChessPiece.PieceType type, ChessGame.TeamColor teamColor, ChessPosition position) {
-        PieceCalculator pc = new PieceCalculator(type, teamColor);
+    public static Collection<ChessMove> possibleMoves(ChessPiece.PieceType type, ChessGame.TeamColor teamColor, ChessPosition position, ChessBoard board) {
+        PieceCalculator pc = new PieceCalculator(type, teamColor, board);
         return pc.possibleMoves(position);
     }
 
