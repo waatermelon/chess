@@ -50,17 +50,14 @@ public class ChessMove {
         return "Move[r: " + this.endPosition.getRow() + ", c: " + this.endPosition.getColumn() + ", t: " + this.promotionPiece + "]";
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(startPosition.getColumn(), chessMove.startPosition.getColumn())
-                && Objects.equals(endPosition.getColumn(), chessMove.endPosition.getColumn())
-                && Objects.equals(startPosition.getRow(), chessMove.startPosition.getRow())
-                && Objects.equals(endPosition.getRow(), chessMove.endPosition.getRow())
-                && promotionPiece == chessMove.promotionPiece;
+        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
     }
 
     @Override

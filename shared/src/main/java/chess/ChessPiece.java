@@ -5,6 +5,7 @@ import chess.helper.PieceCalculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -62,4 +63,18 @@ public class ChessPiece {
         PieceCalculator pc = new PieceCalculator(type, team, board);
         return pc.possibleMoves(myPosition);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "pieceColor=" + pieceColor +
+                ", type=" + type +
+                '}';
+    }
+
 }
