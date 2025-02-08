@@ -129,7 +129,7 @@ public class ChessGame {
             board.addPiece(move.getEndPosition(), new ChessPiece(getTeamTurn(), move.getPromotionPiece()));
         } else {
             board.addPiece(move.getEndPosition(), current);
-        } asdf
+        }asdfasdf
 
 
         board.addPiece(move.getStartPosition(), null);
