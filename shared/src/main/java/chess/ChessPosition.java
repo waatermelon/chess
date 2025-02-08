@@ -35,6 +35,10 @@ public class ChessPosition {
         return col;
     }
 
+    public boolean equals(ChessPosition o) {
+        return getRow() == o.getRow() && getColumn() == o.getColumn();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
@@ -47,5 +51,13 @@ public class ChessPosition {
     @Override
     public int hashCode() {
         return Objects.hash(row, col);
+    }
+
+    @Override
+    public String toString() {
+        return "pos{" +
+                "y=" + row +
+                ", x=" + col +
+                '}';
     }
 }

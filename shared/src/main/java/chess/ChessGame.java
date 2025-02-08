@@ -1,5 +1,8 @@
 package chess;
 
+import chess.helper.GameCalculator;
+
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -14,7 +17,7 @@ public class ChessGame {
     private TeamColor turn = TeamColor.WHITE;
 
     public ChessGame() {
-
+        board.resetBoard();
     }
 
     /**
@@ -49,7 +52,37 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+
+
+        ChessPiece current = board.getPiece(startPosition);
+        ArrayList<ChessMove> validMovesArrayList = new ArrayList<>();
+        /*
+
+        for piece:
+            - check if moving piece allows check (ie: currently protecting from threat)
+            - check if each move causes a check on king. if not, allow the move.
+
+         */
+        //black = lowercase
+
+
+        GameCalculator calc = new GameCalculator(board);
+        Collection<ChessMove> currentMoves = current.pieceMoves(board, startPosition);
+        ArrayList<ChessPosition> kingThreat = calc.getKingThreats(getTeamTurn());
+
+        for (ChessMove move: current.pieceMoves(board, startPosition)) {
+            //Check if piece moving would allow check.
+            board.addPiece(startPosition, null);
+            ChessPiece posPiece = board.getPiece(move.getEndPosition());
+            board.addPiece(move.getEndPosition(), current);
+            if(!isInCheck(current.getTeamColor())) {
+                validMovesArrayList.add(move);
+            }
+            board.addPiece(move.getEndPosition(), posPiece);
+            board.addPiece(startPosition, current);
+        }
+
+        return validMovesArrayList;
     }
 
     /**
@@ -59,7 +92,48 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPiece current = board.getPiece(move.getStartPosition());
+        if(current == null) throw new InvalidMoveException("piece does not exist");
+        boolean correctTeam = getTeamTurn() == current.getTeamColor();
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        System.out.println(move);
+        /*
+        restraints:
+        - piece exists
+        - correct team moving
+        - move is valid
+        - promotion is valid
+
+        after:
+        - set team turn
+        - set promotion
+        - set position
+        - remove previous position
+         */
+        if(!correctTeam) throw new InvalidMoveException("incorrect team moving");
+        if(validMoves.isEmpty()) throw new InvalidMoveException("no valid moves possible for piece");
+        if(!validMoves.contains(move))  throw new InvalidMoveException("move not contained");
+        if(move.getPromotionPiece() != null) {
+            ArrayList<ChessMove> possibleMoves = new ArrayList<>(current.pieceMoves(board, move.getStartPosition()));
+            boolean promotionPossible = false;
+            for(ChessMove pmove: possibleMoves) {
+                if(pmove.getPromotionPiece() == move.getPromotionPiece()) {
+                    promotionPossible = true;
+                    break;
+                }
+            }
+            if(!promotionPossible) throw new InvalidMoveException("promotion impossible");
+        }
+
+        if(move.getPromotionPiece() != null) {
+            board.addPiece(move.getEndPosition(), new ChessPiece(getTeamTurn(), move.getPromotionPiece()));
+        } else {
+            board.addPiece(move.getEndPosition(), current);
+        }
+
+
+        board.addPiece(move.getStartPosition(), null);
+        setTeamTurn((getTeamTurn() == TeamColor.BLACK) ? TeamColor.WHITE : TeamColor.BLACK);
     }
 
     /**
@@ -69,7 +143,9 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        GameCalculator calc = new GameCalculator(board);
+        ArrayList<ChessPosition> kingThreats = calc.getKingThreats(teamColor);
+        return !kingThreats.isEmpty();
     }
 
     /**
@@ -79,7 +155,8 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        GameCalculator calc = new GameCalculator(board);
+        return isInCheck(teamColor) && calc.isPossibleMove(teamColor);
     }
 
     /**
@@ -90,7 +167,14 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        GameCalculator calc = new GameCalculator(board);
+        //TODO, need to see if...
+        /*
+        - King is unable to move
+        - Pieces are unable to move
+        - King has no threats
+         */
+        return calc.isInStalemate(teamColor);//Temp
     }
 
     /**

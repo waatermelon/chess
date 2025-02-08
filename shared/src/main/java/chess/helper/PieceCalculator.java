@@ -108,7 +108,6 @@ public class PieceCalculator {
                 movesList.add(move);
             }
         }
-        System.out.println(movesList);
         return movesList;
     }
 
