@@ -1,6 +1,5 @@
 package dataaccess;
 
-import model.AuthData;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -9,8 +8,8 @@ public class MemoryGameDAO implements GameDAO {
 
     ArrayList<GameData> db;
 
-    public MemoryGameDAO(ArrayList<GameData> initAuthData) {
-        db = initAuthData;
+    public MemoryGameDAO(ArrayList<GameData> initGameData) {
+        db = initGameData;
     }
 
     public MemoryGameDAO() {
