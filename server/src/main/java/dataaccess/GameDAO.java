@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.GameData;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
 public interface GameDAO {
@@ -10,7 +11,7 @@ public interface GameDAO {
     void createGame(GameData gameData);
 
     // Read
-    void getGame(int gameID);
+    GameData getGame(int gameID) throws DataAccessException;
 
     // Update
     void updateGame(GameData gameData);
