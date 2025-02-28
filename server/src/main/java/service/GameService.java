@@ -4,7 +4,6 @@ import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
 
 public class GameService {
-    //TODO
 
     AuthDAO authDAO;
     GameDAO gameDAO;

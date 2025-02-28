@@ -8,7 +8,7 @@ import spark.Response;
 public class AuthHandler {
 
     private final AuthService authService;
-    Gson gson = new Gson();
+    Gson serializer = new Gson();
 
     public AuthHandler(AuthService authService) {
         this.authService = authService;
@@ -22,6 +22,10 @@ public class AuthHandler {
     public Object logout(Request request, Response response) {
         //implement with service//TODO
         return null;
+    }
+
+    public void clear() {
+        authService.clear();
     }
 
 }

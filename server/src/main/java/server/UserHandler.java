@@ -8,7 +8,7 @@ import spark.Response;
 public class UserHandler {
 
     private final UserService userService;
-    Gson gson = new Gson();
+    Gson serializer = new Gson();
     
     public UserHandler(UserService userService) {
         this.userService = userService;
@@ -17,5 +17,9 @@ public class UserHandler {
     public Object register(Request request, Response response) {
         //implement with service//TODO
         return null;
+    }
+
+    public void clear() {
+        userService.clear();
     }
 }

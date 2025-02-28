@@ -8,7 +8,7 @@ import spark.Response;
 public class GameHandler {
 
     private final GameService gameService;
-    Gson gson = new Gson();
+    Gson serializer = new Gson();
 
     public GameHandler(GameService gameService) {
         this.gameService = gameService;
@@ -32,6 +32,10 @@ public class GameHandler {
     public Object clearApplication(Request request, Response response) {
         //implement with service//TODO
         return null;
+    }
+
+    public void clear() {
+        gameService.clear();
     }
 
 }
