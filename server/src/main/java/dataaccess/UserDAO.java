@@ -8,7 +8,7 @@ public interface UserDAO {
     void createUser(UserData userData);
 
     // Read
-    UserData getUser(String username, String password) throws DataAccessException;
+    void getUser(String username, String password) throws DataAccessException;
 
     // Update
     // None for UserDAO

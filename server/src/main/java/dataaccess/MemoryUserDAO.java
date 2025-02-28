@@ -29,10 +29,10 @@ public class MemoryUserDAO implements UserDAO{
 
     // Read
     @Override
-    public UserData getUser(String username, String password) throws DataAccessException {
+    public void getUser(String username, String password) throws DataAccessException {
         for (UserData dbUserData: db) {
             if (dbUserData.username().equals(username) && dbUserData.password().equals(password)) {
-                return dbUserData;
+                return;
             }
         }
         throw new DataAccessException("Password was incorrect, or user was not found.");
