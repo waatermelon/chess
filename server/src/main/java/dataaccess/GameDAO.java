@@ -12,6 +12,8 @@ public interface GameDAO {
 
     // Read
     GameData getGame(int gameID) throws DataAccessException;
+    ArrayList<GameData> listGames();
+    int getNextGameID();
 
     // Update
     void updateGame(GameData gameData);
@@ -19,6 +21,5 @@ public interface GameDAO {
     // Delete
     void clear();
 
-    ArrayList<GameData> listGames();
 
 }

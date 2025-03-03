@@ -61,4 +61,9 @@ public class MemoryGameDAO implements GameDAO {
         return db;
     }
 
+    @Override
+    public int getNextGameID() {
+        return db.size() + 1;
+    }
+
 }
