@@ -15,6 +15,7 @@ public class GameService {
 
     public void listGames() {
         //TODO
+        // setup up
     }
 
     public void createGame() {
