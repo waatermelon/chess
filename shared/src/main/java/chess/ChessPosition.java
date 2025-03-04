@@ -31,12 +31,7 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-
         return col;
-    }
-
-    public boolean equals(ChessPosition o) {
-        return getRow() == o.getRow() && getColumn() == o.getColumn();
     }
 
     @Override
@@ -55,7 +50,7 @@ public class ChessPosition {
 
     @Override
     public String toString() {
-        return "pos{" +
+        return "{" +
                 "y=" + row +
                 ", x=" + col +
                 '}';

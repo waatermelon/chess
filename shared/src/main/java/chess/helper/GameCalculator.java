@@ -18,8 +18,10 @@ public class GameCalculator {
         for(int i = 0; i < 8; ++i) {
             for(int j = 0; j < 8; ++j) {
                 ChessPiece piece = boardArr[i][j];
-                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == team)
+                if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING &&
+                        piece.getTeamColor() == team) {
                     return new ChessPosition(i + 1, j + 1);
+                }
             }
         }
         return null;
@@ -33,17 +35,17 @@ public class GameCalculator {
         for(int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 ChessPiece piece = boardArr[i][j];
-                if (piece != null && piece.getTeamColor() != team) {
-                    //other team piece, now check if it is attacking king
-                    ChessPosition kingPos = getKingPosition(team);
-                    for (ChessMove move : piece.pieceMoves(board, new ChessPosition(i + 1, j + 1))) {
-                        ChessPosition test = new ChessPosition(1, 1);
-                        if (move.getEndPosition().equals(kingPos)) {
-                            threats.add(new ChessPosition(i + 1, j + 1));
-                            break;
-                        }
+                if (piece == null || piece.getTeamColor() == team) {
+                    continue;
+                }
+                ChessPosition kingPos = getKingPosition(team);
+                for (ChessMove move : piece.pieceMoves(board,new ChessPosition(i + 1, j + 1))) {
+                    if (move.getEndPosition().equals(kingPos)) {
+                        threats.add(new ChessPosition(i + 1, j + 1));
+                        break;
                     }
                 }
+
             }
         }
         return threats;
@@ -56,7 +58,8 @@ public class GameCalculator {
             for (int j = 0; j < 8; ++j) {
                 ChessPiece current = boardArr[i][j];
                 if(current != null && current.getTeamColor() != team) {
-                    for(ChessMove move: current.pieceMoves(board, new ChessPosition(i + 1, j + 1))) {
+                    for(ChessMove move: current.pieceMoves(board,
+                            new ChessPosition(i + 1, j + 1))) {
                         boolean contained = false;
                         for(ChessPosition pos: enemyPositions) {
                             if(move.getEndPosition().equals(pos)) {
@@ -74,7 +77,8 @@ public class GameCalculator {
         return enemyPositions;
     }
 
-    public ArrayList<ChessMove> getMovePositionNonOverlap(ArrayList<ChessPosition> positions, ArrayList<ChessMove> moves) {
+    public ArrayList<ChessMove> getMovePositionNonOverlap(ArrayList<ChessPosition> positions,
+                                                          ArrayList<ChessMove> moves) {
         ArrayList<ChessMove> nonOverlap = new ArrayList<>();
         for (ChessMove move : moves) {
             boolean foundOverlap = false;
@@ -91,45 +95,14 @@ public class GameCalculator {
         return nonOverlap;
     }
 
-    public ArrayList<ChessPosition> getTeamPiecePositions(ChessGame.TeamColor team, boolean includeKing) {
-        ChessPiece[][] boardArr = board.getBoard();
-        ArrayList<ChessPosition> teamPieces = new ArrayList<>();
-        for(int i = 0; i < 8; ++i) {
-            for (int j = 0; j < 8; ++j) {
-                ChessPiece current = boardArr[i][j];
-                if(current != null && current.getTeamColor() == team) {
-                    if(!includeKing && current.getPieceType() == ChessPiece.PieceType.KING)
-                        continue;
-                    teamPieces.add(new ChessPosition(i + 1, j + 1));
-                }
-            }
-        }
-        return teamPieces;
-    }
-    public ArrayList<ChessPiece> getTeamPieces(ChessGame.TeamColor team, boolean includeKing) {
-        ChessPiece[][] boardArr = board.getBoard();
-        ArrayList<ChessPiece> teamPieces = new ArrayList<>();
-        for(int i = 0; i < 8; ++i) {
-            for (int j = 0; j < 8; ++j) {
-                ChessPiece current = boardArr[i][j];
-                if(current != null && current.getTeamColor() == team) {
-                    if(!includeKing && current.getPieceType() == ChessPiece.PieceType.KING)
-                        continue;
-                    teamPieces.add(current);
-                }
-            }
-        }
-        return teamPieces;
-    }
-
-
     public ArrayList<ChessMove> getKingMoves(ChessGame.TeamColor team) {
-        ArrayList<ChessPosition> kingThreats = getKingThreats(team);
+
         ArrayList<ChessPosition> enemyPositions = getEnemyPositions(team);
         ChessPosition kingPos = getKingPosition(team);
         ChessPiece king = board.getPiece(kingPos);
         Collection<ChessMove> kingMoves = king.pieceMoves(board, getKingPosition(team));
         ArrayList<ChessMove> newKingMoves = new ArrayList<>();
+
         for(ChessMove move: kingMoves) {
             board.addPiece(kingPos, null);
             ChessPiece temp = board.getPiece(move.getEndPosition());
@@ -143,7 +116,6 @@ public class GameCalculator {
                 newKingMoves.add(move);
             }
         }
-
         return getMovePositionNonOverlap(enemyPositions, newKingMoves);
     }
 
@@ -161,46 +133,60 @@ public class GameCalculator {
         board.addPiece(move.getEndPosition(), temp);
         board.addPiece(move.getStartPosition(), current);
         return isAllowed;
-
     }
 
     public boolean isInStalemate(ChessGame.TeamColor team) {
         ChessPiece[][] boardArr = board.getBoard();
 
-
-
         for(int i = 0; i < 8; ++i) {
             for (int j = 0; j  < 8; ++j) {
                 ChessPiece current = boardArr[i][j];
-                if(current != null && current.getTeamColor() == team && current.getPieceType() != ChessPiece.PieceType.KING) {
-                    boolean availableMove = false;
-                    for(ChessMove move: current.pieceMoves(board, new ChessPosition(i + 1, j + 1))) {
-                        if( moveAllowed(move, team)){
-                            return false;
-                        }
-                    }
+                if (current == null) {
+                    continue;
                 }
+                if(current.getTeamColor() != team) {
+                    continue;
+                }
+                if(current.getPieceType() == ChessPiece.PieceType.KING) {
+                    continue;
+                }
+                if(allowedMoves(current, i, j, team)) {
+                    continue;
+                }
+                return false;
             }
         }
         return getKingThreats(team).isEmpty() && getKingMoves(team).isEmpty();
     }
 
+    private boolean allowedMoves(ChessPiece current, int i, int j, ChessGame.TeamColor team) {
+        for(ChessMove move: current.pieceMoves(board, new ChessPosition(i + 1, j + 1))) {
+            if( moveAllowed(move, team)){
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean isPossibleMove(ChessGame.TeamColor team) {
         ChessPiece[][] boardArr = board.getBoard();
-
-
 
         for(int i = 0; i < 8; ++i) {
             for (int j = 0; j  < 8; ++j) {
                 ChessPiece current = boardArr[i][j];
-                if(current != null && current.getTeamColor() == team && current.getPieceType() != ChessPiece.PieceType.KING) {
-                    boolean availableMove = false;
-                    for(ChessMove move: current.pieceMoves(board, new ChessPosition(i + 1, j + 1))) {
-                        if( moveAllowed(move, team)){
-                            return false;
-                        }
-                    }
+                if (current == null) {
+                    continue;
                 }
+                if(current.getTeamColor() != team) {
+                    continue;
+                }
+                if(current.getPieceType() == ChessPiece.PieceType.KING) {
+                    continue;
+                }
+                if(allowedMoves(current, i, j, team)) {
+                    continue;
+                }
+                return false;
             }
         }
         return getKingMoves(team).isEmpty();

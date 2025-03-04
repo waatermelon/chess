@@ -52,26 +52,14 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-
-
         ChessPiece current = board.getPiece(startPosition);
         ArrayList<ChessMove> validMovesArrayList = new ArrayList<>();
-        /*
-
-        for piece:
-            - check if moving piece allows check (ie: currently protecting from threat)
-            - check if each move causes a check on king. if not, allow the move.
-
-         */
-        //black = lowercase
-
 
         GameCalculator calc = new GameCalculator(board);
         Collection<ChessMove> currentMoves = current.pieceMoves(board, startPosition);
         ArrayList<ChessPosition> kingThreat = calc.getKingThreats(getTeamTurn());
 
         for (ChessMove move: current.pieceMoves(board, startPosition)) {
-            //Check if piece moving would allow check.
             board.addPiece(startPosition, null);
             ChessPiece posPiece = board.getPiece(move.getEndPosition());
             board.addPiece(move.getEndPosition(), current);
