@@ -29,7 +29,7 @@ public class AuthHandler {
         return serializer.toJson(loginResult);
     }
 
-    public Object logout(Request request, Response response) throws DataAccessException, UnauthorizedException {
+    public Object logout(Request request, Response response) throws DataAccessException, UnauthorizedException, BadRequestException {
         String authToken = request.headers("authorization");
         authService.logout(authToken);
         response.status(200);

@@ -19,7 +19,9 @@ public class MemoryUserDAO implements UserDAO{
 
     // Create
     @Override
-    public void createUser(UserData userData) throws DataAccessException {
+    public void createUser(UserData userData) throws DataAccessException, BadRequestException {
+        if (userData.password() == null || userData.username() == null)
+            throw new BadRequestException("");
         for (UserData dbUserData: db) {
             if (dbUserData.equals(userData)) {
                 throw new DataAccessException("");

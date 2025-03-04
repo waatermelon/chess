@@ -1,8 +1,6 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 
@@ -19,62 +17,60 @@ public class GameService {
         this.gameDAO = gameDAO;
     }
 
-    public ArrayList<GameData> listGames(String authToken) throws DataAccessException {
+    public ArrayList<GameData> listGames(String authToken) throws DataAccessException, UnauthorizedException {
         try {
             authDAO.getAuth(authToken);
         } catch (Exception e) {
-            throw new DataAccessException("Error accessing data: " + e.getMessage());
+            throw new UnauthorizedException("Error accessing data: " + e.getMessage());
         }
 
         return gameDAO.listGames();
     }
 
-    public int createGame(String authToken) throws DataAccessException{
+    public int createGame(String authToken, String gameName) throws DataAccessException, UnauthorizedException {
         try {
             authDAO.getAuth(authToken);
         } catch (Exception e) {
-            throw new DataAccessException("Error accessing data: " + e.getMessage());
+            throw new UnauthorizedException("Error accessing data: " + e.getMessage());
         }
 
         int gameID = gameDAO.getNextGameID();
-        gameDAO.createGame(new GameData(gameID, null, null, null, null));
+        gameDAO.createGame(new GameData(gameID, null, null, gameName, null));
         return gameID;
     }
 
-    public void joinGame(String authToken, String playerColor, int gameID) throws DataAccessException{
+    public void joinGame(String authToken, String playerColor, int gameID) throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
         //TODO
         AuthData authData;
         try {
             authData = authDAO.getAuth(authToken);
         } catch (Exception e) {
-            throw new DataAccessException("Error accessing data: " + e.getMessage());
+            throw new UnauthorizedException("Error accessing data: " + e.getMessage());
         }
         GameData game;
         try {
             game = gameDAO.getGame(gameID);
         } catch (Exception e) {
-            throw new DataAccessException("Error accessing data: " + e.getMessage());
+            throw new BadRequestException("Error accessing data: " + e.getMessage());
         }
-        if (!playerColor.contains("WHITE") && !playerColor.contains("BLACK"))
-            throw new DataAccessException("Not given a color");
+        if (playerColor == null || (!playerColor.contains("WHITE") && !playerColor.contains("BLACK")))
+            throw new BadRequestException("Not given a color");
 
         String whiteUser = game.whiteUsername();
         String blackUser = game.blackUsername();
-
         if (playerColor.equals("WHITE")) {
             if (whiteUser != null) {
-                throw new DataAccessException("Player already exists");
+                throw new AlreadyTakenException("Player already exists");
             } else {
                 whiteUser = authData.username();
             }
         } else if (playerColor.equals("BLACK")) {
             if (blackUser != null) {
-                throw new DataAccessException("Player already exists");
+                throw new AlreadyTakenException("Player already exists");
             } else {
                 blackUser = authData.username();
             }
         }
-
         gameDAO.updateGame(new GameData(game.gameID(), whiteUser, blackUser, game.gameName(), game.game()));
 
     }

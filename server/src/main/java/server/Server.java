@@ -81,6 +81,6 @@ public class Server {
 
     private void exception(Exception e, Request request, Response response) {
         response.status(500);
-        response.body("{ \"message\": Error: " + e.getMessage() + " }");
+        response.body("{ \"message\": Error: TSETING" + e.getMessage() + " }");
     }
 }
