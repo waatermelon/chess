@@ -1,8 +1,6 @@
 package service;
 
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.LoginResult;
 import model.UserData;
@@ -21,12 +19,11 @@ public class AuthService {
         this.userDAO = userDAO;
     }
 
-    public LoginResult login(UserData userData) throws DataAccessException {
+    public LoginResult login(UserData userData) throws DataAccessException, BadRequestException, UnauthorizedException {
         try {
-            // confirms user exists, otherwise exception is thrown
             userDAO.getUser(userData.username(), userData.password());
         } catch(Exception e) {
-            throw new DataAccessException("Error accessing data from service: " + e.getMessage());
+            throw new UnauthorizedException("Error accessing data from service: " + e.getMessage());
         }
 
         String token = UUID.randomUUID().toString();
@@ -36,12 +33,12 @@ public class AuthService {
         return new LoginResult(authData.username(), authData.authToken());
     }
 
-    public void logout(String authToken) throws DataAccessException {
+    public void logout(String authToken) throws DataAccessException, UnauthorizedException {
         AuthData auth;
         try {
             auth = authDAO.getAuth(authToken);
         } catch(Exception e) {
-            throw new DataAccessException("Error accessing data from service: " + e.getMessage());
+            throw new UnauthorizedException("Error accessing data from service: " + e.getMessage());
         }
 
         authDAO.deleteAuth(auth);

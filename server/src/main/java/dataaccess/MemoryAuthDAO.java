@@ -18,10 +18,10 @@ public class MemoryAuthDAO implements AuthDAO{
 
     // Create
     @Override
-    public void createAuth(AuthData authData) {
+    public void createAuth(AuthData authData) throws DataAccessException {
         for (AuthData dbAuthData: db) {
             if (dbAuthData.equals(authData)) {
-                return;
+                throw new DataAccessException("");
             }
         }
         db.add(authData);

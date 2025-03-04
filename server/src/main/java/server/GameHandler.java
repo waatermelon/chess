@@ -41,7 +41,7 @@ public class GameHandler {
         return "{}";
     }
 
-    public void clear() {
+    public void clear() throws Exception {
         gameService.clear();
     }
 

@@ -18,10 +18,10 @@ public class MemoryGameDAO implements GameDAO {
 
     // Create
     @Override
-    public void createGame(GameData gameData) {
+    public void createGame(GameData gameData) throws DataAccessException{
         for (GameData dbGameData: db) {
             if (dbGameData.equals(gameData)) {
-                return;
+                throw new DataAccessException("");
             }
         }
         db.add(gameData);
@@ -40,7 +40,7 @@ public class MemoryGameDAO implements GameDAO {
 
     // Update
     @Override
-    public void updateGame(GameData gameData) {
+    public void updateGame(GameData gameData) throws DataAccessException {
         for (int i = 0; i < db.size(); ++i) {
             if (db.get(i).gameID() == gameData.gameID()) {
                 db.set(i, gameData);

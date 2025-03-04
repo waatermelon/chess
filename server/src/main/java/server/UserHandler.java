@@ -1,6 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.AlreadyTakenException;
+import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.RegisterResult;
@@ -18,14 +20,24 @@ public class UserHandler {
         this.userService = userService;
     }
 
-    public Object register(Request request, Response response) throws DataAccessException {
+    public Object register(Request request, Response response) throws DataAccessException, BadRequestException, AlreadyTakenException {
         UserData userData = serializer.fromJson(request.body(), UserData.class);
-        RegisterResult registerResult = userService.register(userData);
+        RegisterResult registerResult;
+        if (userData.username() == null || userData.password() == null)
+            throw new BadRequestException("");
+
+        try {
+            registerResult = userService.register(userData);
+        } catch (Exception e) {
+            throw new AlreadyTakenException("");
+        }
+
+
         response.status(200);
         return new Gson().toJson(registerResult);
     }
 
-    public void clear() {
+    public void clear() throws Exception {
         userService.clear();
     }
 }

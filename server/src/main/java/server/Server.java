@@ -38,6 +38,11 @@ public class Server {
         // TODO work on creating exceptions next
         // TODO work on service tests, and others as well if time permits
         //Spark.exception();
+        Spark.exception(AlreadyTakenException.class, this::alreadyTakenException);
+        Spark.exception(BadRequestException.class, this::badRequestException);
+        Spark.exception(UnauthorizedException.class, this::unauthorizedException);
+        Spark.exception(Exception.class, this::exception);
+
 
         //This line initializes the server and can be removed once you have a functioning endpoint
         //Spark.init();
@@ -51,7 +56,7 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private Object clear(Request request, Response response) {
+    private Object clear(Request request, Response response) throws Exception {
         authHandler.clear();
         gameHandler.clear();
         userHandler.clear();
@@ -59,7 +64,23 @@ public class Server {
         return "{}";
     }
 
-    private void unauthorized() {
+    private void alreadyTakenException(AlreadyTakenException e, Request request, Response response) {
+        response.status(403);
+        response.body("{\"message\": \"Error: already taken\"}");
+    }
 
+    private void badRequestException(BadRequestException e, Request request, Response response) {
+        response.status(400);
+        response.body("{ \"message\": \"Error: bad request\" }");
+    }
+
+    private void unauthorizedException(UnauthorizedException e, Request request, Response response) {
+        response.status(401);
+        response.body("{ \"message\": \"Error: unauthorized\" }");
+    }
+
+    private void exception(Exception e, Request request, Response response) {
+        response.status(500);
+        response.body("{ \"message\": Error: " + e.getMessage() + " }");
     }
 }

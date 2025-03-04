@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthDAO;
+import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
@@ -20,17 +21,16 @@ public class UserService {
         this.userDAO = userDAO;
     }
 
-    public RegisterResult register(UserData userData) throws DataAccessException {
+    public RegisterResult register(UserData userData) throws BadRequestException, DataAccessException {
         try {
             userDAO.createUser(userData);
         } catch(Exception e) {
-            throw new DataAccessException("Error accessing data from service: " + e.getMessage());
+            throw new BadRequestException("Error accessing data from service: " + e.getMessage());
         }
 
         String token = UUID.randomUUID().toString();
         AuthData authData = new AuthData(userData.username(), token);
         authDAO.createAuth(authData);
-
         return new RegisterResult(authData.username(), authData.authToken());
     }
 
