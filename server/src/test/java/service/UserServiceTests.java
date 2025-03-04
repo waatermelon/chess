@@ -1,11 +1,9 @@
-package passoff.server;
+package service;
 
 import dataaccess.*;
-import model.AuthData;
 import model.RegisterResult;
 import model.UserData;
 import org.junit.jupiter.api.*;
-import service.UserService;
 
 ;
 
