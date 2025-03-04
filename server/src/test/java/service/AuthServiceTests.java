@@ -9,7 +9,6 @@ public class AuthServiceTests {
 
     static UserDAO userDAO;
     static AuthDAO authDAO;
-    static GameDAO gameDAO;
     static AuthService authService;
     static UserService userService;
     static GameService gameService;
@@ -20,10 +19,8 @@ public class AuthServiceTests {
     public static void init() {
         userDAO = new MemoryUserDAO();
         authDAO = new MemoryAuthDAO();
-        gameDAO = new MemoryGameDAO();
         authService = new AuthService(authDAO, userDAO);
         userService = new UserService(authDAO, userDAO);
-        gameService = new GameService(authDAO, gameDAO);
     }
 
     @BeforeEach

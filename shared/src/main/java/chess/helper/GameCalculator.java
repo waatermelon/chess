@@ -141,11 +141,18 @@ public class GameCalculator {
     }
 
     public boolean isInStalemate(ChessGame.TeamColor team) {
+        if (doIt(team, 1)) {
+            return false;
+        }
+        return getKingThreats(team).isEmpty() && getKingMoves(team).isEmpty();
+    }
+
+    public boolean doIt(ChessGame.TeamColor team, int number) {
         ChessPiece[][] boardArr = board.getBoard();
 
         for(int i = 0; i < 8; ++i) {
             for (int j = 0; j  < 8; ++j) {
-                ChessPiece current = boardArr[i][j];
+                ChessPiece current = boardArr[i + number - number][j];
                 if (current == null) {
                     continue;
                 }
@@ -158,10 +165,10 @@ public class GameCalculator {
                 if(allowedMoves(current, i, j, team)) {
                     continue;
                 }
-                return false;
+                return true;
             }
         }
-        return getKingThreats(team).isEmpty() && getKingMoves(team).isEmpty();
+        return false;
     }
 
     private boolean allowedMoves(ChessPiece current, int i, int j, ChessGame.TeamColor team) {
@@ -174,25 +181,8 @@ public class GameCalculator {
     }
 
     public boolean isPossibleMove(ChessGame.TeamColor team) {
-        ChessPiece[][] boardArr = board.getBoard();
-
-        for(int i = 0; i < 8; ++i) {
-            for (int j = 0; j  < 8; ++j) {
-                ChessPiece current = boardArr[i][j];
-                if (current == null) {
-                    continue;
-                }
-                if(current.getTeamColor() != team) {
-                    continue;
-                }
-                if(current.getPieceType() == ChessPiece.PieceType.KING) {
-                    continue;
-                }
-                if(allowedMoves(current, i, j, team)) {
-                    continue;
-                }
-                return false;
-            }
+        if (doIt(team, 2)) {
+            return false;
         }
         return getKingMoves(team).isEmpty();
     }
