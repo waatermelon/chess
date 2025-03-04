@@ -27,7 +27,6 @@ public class AuthServiceTests {
     public void setup() {
         authService.clear();
         userService.clear();
-        gameService.clear();
         userData = new UserData("Sigma boy", "password", "sigmaboy@hotmail.com");
         failUserData = new UserData("Failure of a human", null, "f@gmail.com");
     }
