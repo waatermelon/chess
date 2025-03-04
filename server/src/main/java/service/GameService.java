@@ -5,7 +5,6 @@ import model.AuthData;
 import model.GameData;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class GameService {
 
@@ -17,7 +16,7 @@ public class GameService {
         this.gameDAO = gameDAO;
     }
 
-    public ArrayList<GameData> listGames(String authToken) throws DataAccessException, UnauthorizedException {
+    public ArrayList<GameData> listGames(String authToken) throws UnauthorizedException {
         try {
             authDAO.getAuth(authToken);
         } catch (Exception e) {
@@ -40,7 +39,6 @@ public class GameService {
     }
 
     public void joinGame(String authToken, String playerColor, int gameID) throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
-        //TODO
         AuthData authData;
         try {
             authData = authDAO.getAuth(authToken);

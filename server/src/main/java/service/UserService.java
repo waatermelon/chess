@@ -5,7 +5,6 @@ import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
-import model.LoginResult;
 import model.RegisterResult;
 import model.UserData;
 

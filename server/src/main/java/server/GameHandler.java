@@ -24,7 +24,7 @@ public class GameHandler {
         this.gameService = gameService;
     }
 
-    public Object listGames(Request request, Response response) throws DataAccessException, UnauthorizedException {
+    public Object listGames(Request request, Response response) throws UnauthorizedException {
         String authToken = request.headers("authorization");
         ArrayList<GameData> gamesList = gameService.listGames(authToken);
         response.status(200);

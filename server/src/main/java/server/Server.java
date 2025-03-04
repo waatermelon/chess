@@ -35,17 +35,10 @@ public class Server {
         Spark.post("/game", gameHandler::createGame);
         Spark.put("/game", gameHandler::joinGame);
 
-        // TODO work on creating exceptions next
-        // TODO work on service tests, and others as well if time permits
-        //Spark.exception();
         Spark.exception(AlreadyTakenException.class, this::alreadyTakenException);
         Spark.exception(BadRequestException.class, this::badRequestException);
         Spark.exception(UnauthorizedException.class, this::unauthorizedException);
         Spark.exception(Exception.class, this::exception);
-
-
-        //This line initializes the server and can be removed once you have a functioning endpoint
-        //Spark.init();
 
         Spark.awaitInitialization();
         return Spark.port();

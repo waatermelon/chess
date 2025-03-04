@@ -28,7 +28,7 @@ public class UserServiceTests {
     void setup() {
         userService.clear();
         userData = new UserData("Sigma boy", "password", "sigmaboy@hotmail.com");
-        failUserData = new UserData("Faiure of a human", null, "f@gmail.com");
+        failUserData = new UserData("Failure of a human", null, "f@gmail.com");
     }
 
 
@@ -42,7 +42,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Negative Register Test")
-    void failRegister() throws BadRequestException, DataAccessException {
+    void failRegister() {
         Assertions.assertThrows(BadRequestException.class, () -> userService.register(failUserData));
     }
 }

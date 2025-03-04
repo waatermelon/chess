@@ -52,7 +52,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Negative Create Game Test")
-    void failCreateGame() throws BadRequestException, DataAccessException, UnauthorizedException {
+    void failCreateGame() {
         Assertions.assertThrows(UnauthorizedException.class, () -> gameService.createGame("false auth token", "game_name"));
     }
 
@@ -67,7 +67,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Negative List Games Test")
-    void failListGames() throws BadRequestException, DataAccessException, UnauthorizedException {
+    void failListGames(){
         Assertions.assertThrows(UnauthorizedException.class, () -> gameService.listGames("false auth token"));
     }
 
@@ -76,7 +76,7 @@ public class GameServiceTests {
     void successfulJoinGame() throws BadRequestException, DataAccessException, UnauthorizedException, AlreadyTakenException {
         RegisterResult registerResult = userService.register(userData);
         RegisterResult registerResult2 = userService.register(userData2);
-        int gameID = gameService.createGame(registerResult2.authToken(), "game_name");
+        gameService.createGame(registerResult2.authToken(), "game_name");
 
         gameService.joinGame(registerResult.authToken(), "BLACK", 1);
         gameService.joinGame(registerResult2.authToken(), "WHITE", 1);
@@ -89,7 +89,7 @@ public class GameServiceTests {
     void failJoinGame() throws BadRequestException, DataAccessException, UnauthorizedException, AlreadyTakenException {
         RegisterResult registerResult = userService.register(userData);
         RegisterResult registerResult2 = userService.register(userData2);
-        int gameID = gameService.createGame(registerResult2.authToken(), "game_name");
+        gameService.createGame(registerResult2.authToken(), "game_name");
 
         gameService.joinGame(registerResult.authToken(), "BLACK", 1);
 
@@ -107,7 +107,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Negative List Games Test")
-    void failClear() throws BadRequestException, DataAccessException, UnauthorizedException {
+    void failClear(){
         Assertions.assertDoesNotThrow(() -> gameService.clear());
     }
 

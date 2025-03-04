@@ -4,14 +4,11 @@ import com.google.gson.Gson;
 import dataaccess.BadRequestException;
 import dataaccess.DataAccessException;
 import dataaccess.UnauthorizedException;
-import model.AuthData;
 import model.LoginResult;
 import model.UserData;
 import service.AuthService;
 import spark.Request;
 import spark.Response;
-
-import javax.xml.crypto.Data;
 
 public class AuthHandler {
 
@@ -29,7 +26,7 @@ public class AuthHandler {
         return serializer.toJson(loginResult);
     }
 
-    public Object logout(Request request, Response response) throws DataAccessException, UnauthorizedException, BadRequestException {
+    public Object logout(Request request, Response response) throws UnauthorizedException, BadRequestException {
         String authToken = request.headers("authorization");
         authService.logout(authToken);
         response.status(200);

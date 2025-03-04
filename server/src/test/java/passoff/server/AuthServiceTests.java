@@ -45,7 +45,7 @@ public class AuthServiceTests {
     @Test
     @DisplayName("Positive Login Test")
     void successLogin() throws BadRequestException, DataAccessException, UnauthorizedException {
-        RegisterResult registerResult = userService.register(userData);
+        userService.register(userData);
         LoginResult loginResult = authService.login(userData);
         Assertions.assertEquals(authDAO.getAuth(loginResult.authToken()).authToken(), loginResult.authToken());
         Assertions.assertEquals(authDAO.getAuth(loginResult.authToken()).username(), loginResult.username());
@@ -53,14 +53,14 @@ public class AuthServiceTests {
 
     @Test
     @DisplayName("Negative Login Test")
-    void failLogin() throws BadRequestException, DataAccessException {
+    void failLogin() {
         Assertions.assertThrows(BadRequestException.class, () -> authService.login(failUserData));
     }
 
     @Test
     @DisplayName("Positive Logout Test")
     void successLogout() throws BadRequestException, DataAccessException, UnauthorizedException {
-        RegisterResult registerResult = userService.register(userData);
+        userService.register(userData);
         LoginResult loginResult = authService.login(userData);
         authService.logout(loginResult.authToken());
         Assertions.assertThrows(DataAccessException.class, () -> authDAO.getAuth(loginResult.authToken()));
@@ -69,8 +69,8 @@ public class AuthServiceTests {
     @Test
     @DisplayName("Negative Logout Test")
     void failLogout() throws BadRequestException, DataAccessException, UnauthorizedException {
-        RegisterResult registerResult = userService.register(userData);
-        LoginResult loginResult = authService.login(userData);
+        userService.register(userData);
+        authService.login(userData);
         Assertions.assertThrows(BadRequestException.class, () -> authService.logout(null));
     }
 }

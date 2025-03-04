@@ -3,7 +3,6 @@ package chess;
 
 import chess.helper.PieceCalculator;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 

@@ -4,8 +4,6 @@ import dataaccess.*;
 import model.AuthData;
 import model.LoginResult;
 import model.UserData;
-import spark.Request;
-import spark.Response;
 
 import java.util.UUID;
 
@@ -35,7 +33,7 @@ public class AuthService {
         return new LoginResult(authData.username(), authData.authToken());
     }
 
-    public void logout(String authToken) throws DataAccessException, UnauthorizedException, BadRequestException {
+    public void logout(String authToken) throws UnauthorizedException, BadRequestException {
         if (authToken == null)
             throw new BadRequestException("");
         AuthData auth;

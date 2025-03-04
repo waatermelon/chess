@@ -38,7 +38,7 @@ public class GameCalculator {
                     ChessPosition kingPos = getKingPosition(team);
                     for (ChessMove move : piece.pieceMoves(board, new ChessPosition(i + 1, j + 1))) {
                         ChessPosition test = new ChessPosition(1, 1);
-                        if (move.getEndPosition().equals(kingPos)) {
+                        if (move.endPosition().equals(kingPos)) {
                             threats.add(new ChessPosition(i + 1, j + 1));
                             break;
                         }
@@ -59,13 +59,13 @@ public class GameCalculator {
                     for(ChessMove move: current.pieceMoves(board, new ChessPosition(i + 1, j + 1))) {
                         boolean contained = false;
                         for(ChessPosition pos: enemyPositions) {
-                            if(move.getEndPosition().equals(pos)) {
+                            if(move.endPosition().equals(pos)) {
                                 contained = true;
                                 break;
                             }
                         }
                         if(!contained) {
-                            enemyPositions.add(move.getEndPosition());
+                            enemyPositions.add(move.endPosition());
                         }
                     }
                 }
@@ -79,7 +79,7 @@ public class GameCalculator {
         for (ChessMove move : moves) {
             boolean foundOverlap = false;
             for (ChessPosition position : positions) {
-                if (position.equals(move.getEndPosition())) {
+                if (position.equals(move.endPosition())) {
                     foundOverlap = true;
                     break;
                 }
@@ -132,14 +132,14 @@ public class GameCalculator {
         ArrayList<ChessMove> newKingMoves = new ArrayList<>();
         for(ChessMove move: kingMoves) {
             board.addPiece(kingPos, null);
-            ChessPiece temp = board.getPiece(move.getEndPosition());
-            board.addPiece(move.getEndPosition(), king);
+            ChessPiece temp = board.getPiece(move.endPosition());
+            board.addPiece(move.endPosition(), king);
             if(isInCheck(team)) {
                 board.addPiece(kingPos, king);
-                board.addPiece(move.getEndPosition(), temp);
+                board.addPiece(move.endPosition(), temp);
             } else {
                 board.addPiece(kingPos, king);
-                board.addPiece(move.getEndPosition(), temp);
+                board.addPiece(move.endPosition(), temp);
                 newKingMoves.add(move);
             }
         }
@@ -153,15 +153,14 @@ public class GameCalculator {
     }
 
     public boolean moveAllowed(ChessMove move, ChessGame.TeamColor team) {
-        ChessPiece current = board.getPiece(move.getStartPosition());
-        board.addPiece(move.getStartPosition(), null);
-        ChessPiece temp = board.getPiece(move.getEndPosition());
-        board.addPiece(move.getEndPosition(), current);
+        ChessPiece current = board.getPiece(move.startPosition());
+        board.addPiece(move.startPosition(), null);
+        ChessPiece temp = board.getPiece(move.endPosition());
+        board.addPiece(move.endPosition(), current);
         boolean isAllowed = !isInCheck(team);
-        board.addPiece(move.getEndPosition(), temp);
-        board.addPiece(move.getStartPosition(), current);
+        board.addPiece(move.endPosition(), temp);
+        board.addPiece(move.startPosition(), current);
         return isAllowed;
-
     }
 
     public boolean isInStalemate(ChessGame.TeamColor team) {
@@ -187,8 +186,6 @@ public class GameCalculator {
 
     public boolean isPossibleMove(ChessGame.TeamColor team) {
         ChessPiece[][] boardArr = board.getBoard();
-
-
 
         for(int i = 0; i < 8; ++i) {
             for (int j = 0; j  < 8; ++j) {
