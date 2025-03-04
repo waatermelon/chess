@@ -31,6 +31,7 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
+
         return col;
     }
 

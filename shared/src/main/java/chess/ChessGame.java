@@ -73,12 +73,12 @@ public class ChessGame {
         for (ChessMove move: current.pieceMoves(board, startPosition)) {
             //Check if piece moving would allow check.
             board.addPiece(startPosition, null);
-            ChessPiece posPiece = board.getPiece(move.endPosition());
-            board.addPiece(move.endPosition(), current);
+            ChessPiece posPiece = board.getPiece(move.getEndPosition());
+            board.addPiece(move.getEndPosition(), current);
             if(!isInCheck(current.getTeamColor())) {
                 validMovesArrayList.add(move);
             }
-            board.addPiece(move.endPosition(), posPiece);
+            board.addPiece(move.getEndPosition(), posPiece);
             board.addPiece(startPosition, current);
         }
 
@@ -92,10 +92,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        ChessPiece current = board.getPiece(move.startPosition());
+        ChessPiece current = board.getPiece(move.getStartPosition());
         if(current == null) throw new InvalidMoveException("piece does not exist");
         boolean correctTeam = getTeamTurn() == current.getTeamColor();
-        Collection<ChessMove> validMoves = validMoves(move.startPosition());
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
         System.out.println(move);
         /*
         restraints:
@@ -113,11 +113,11 @@ public class ChessGame {
         if(!correctTeam) throw new InvalidMoveException("incorrect team moving");
         if(validMoves.isEmpty()) throw new InvalidMoveException("no valid moves possible for piece");
         if(!validMoves.contains(move))  throw new InvalidMoveException("move not contained");
-        if(move.promotionPiece() != null) {
-            ArrayList<ChessMove> possibleMoves = new ArrayList<>(current.pieceMoves(board, move.startPosition()));
+        if(move.getPromotionPiece() != null) {
+            ArrayList<ChessMove> possibleMoves = new ArrayList<>(current.pieceMoves(board, move.getStartPosition()));
             boolean promotionPossible = false;
             for(ChessMove pmove: possibleMoves) {
-                if(pmove.promotionPiece() == move.promotionPiece()) {
+                if(pmove.getPromotionPiece() == move.getPromotionPiece()) {
                     promotionPossible = true;
                     break;
                 }
@@ -125,14 +125,14 @@ public class ChessGame {
             if(!promotionPossible) throw new InvalidMoveException("promotion impossible");
         }
 
-        if(move.promotionPiece() != null) {
-            board.addPiece(move.endPosition(), new ChessPiece(getTeamTurn(), move.promotionPiece()));
+        if(move.getPromotionPiece() != null) {
+            board.addPiece(move.getEndPosition(), new ChessPiece(getTeamTurn(), move.getPromotionPiece()));
         } else {
-            board.addPiece(move.endPosition(), current);
+            board.addPiece(move.getEndPosition(), current);
         }
 
 
-        board.addPiece(move.startPosition(), null);
+        board.addPiece(move.getStartPosition(), null);
         setTeamTurn((getTeamTurn() == TeamColor.BLACK) ? TeamColor.WHITE : TeamColor.BLACK);
     }
 

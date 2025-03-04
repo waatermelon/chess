@@ -61,7 +61,7 @@ public class PieceCalculator {
     private Collection<ChessMove> filterMoves(ArrayList<ChessMove> moves) {
         ArrayList<ChessMove> movesList = new ArrayList<>();
         for (ChessMove move : moves) {
-            ChessPiece other = board.getPiece(move.endPosition());
+            ChessPiece other = board.getPiece(move.getEndPosition());
             if (other != null && other.getTeamColor() != teamColor){
                 movesList.add(move);
                 break;
@@ -77,10 +77,10 @@ public class PieceCalculator {
     private Collection<ChessMove> removeIllegalMoves(Collection<ChessMove> moves) {
         ArrayList<ChessMove> movesList = new ArrayList<>();
         for (ChessMove move : moves) {
-            if (move.endPosition().getRow() > 8 || move.endPosition().getRow() < 1) continue;
-            if (move.endPosition().getColumn() > 8 || move.endPosition().getColumn() < 1) continue;
+            if (move.getEndPosition().getRow() > 8 || move.getEndPosition().getRow() < 1) continue;
+            if (move.getEndPosition().getColumn() > 8 || move.getEndPosition().getColumn() < 1) continue;
 
-            ChessPiece other = board.getPiece(move.endPosition());
+            ChessPiece other = board.getPiece(move.getEndPosition());
             if (other != null && other.getTeamColor() != teamColor) {
                 movesList.add(move);
             } else if (other == null) {
@@ -96,11 +96,11 @@ public class PieceCalculator {
         ArrayList<ChessMove> movesList = new ArrayList<>();
 
         for (ChessMove move : moves) {
-            if (move.endPosition().getRow() > 8 || move.endPosition().getRow() < 1) continue;
-            if (move.endPosition().getColumn() > 8 || move.endPosition().getColumn() < 1) continue;
+            if (move.getEndPosition().getRow() > 8 || move.getEndPosition().getRow() < 1) continue;
+            if (move.getEndPosition().getColumn() > 8 || move.getEndPosition().getColumn() < 1) continue;
 
-            ChessPiece other = board.getPiece(move.endPosition());
-            boolean diagonal = move.startPosition().getColumn() != move.endPosition().getColumn();
+            ChessPiece other = board.getPiece(move.getEndPosition());
+            boolean diagonal = move.getStartPosition().getColumn() != move.getEndPosition().getColumn();
 
             if (diagonal && other != null && other.getTeamColor() != teamColor) {
                 movesList.add(move);
@@ -114,11 +114,11 @@ public class PieceCalculator {
     private Collection<ChessMove> getPromotions(Collection<ChessMove> moves) {
         ArrayList<ChessMove> movesList = new ArrayList<>();
         for (ChessMove move: moves) {
-            if (move.endPosition().getRow() == 1 || move.endPosition().getRow() == 8) {
-                movesList.add(new ChessMove(move.startPosition(), move.endPosition(), ChessPiece.PieceType.QUEEN));
-                movesList.add(new ChessMove(move.startPosition(), move.endPosition(), ChessPiece.PieceType.BISHOP));
-                movesList.add(new ChessMove(move.startPosition(), move.endPosition(), ChessPiece.PieceType.ROOK));
-                movesList.add(new ChessMove(move.startPosition(), move.endPosition(), ChessPiece.PieceType.KNIGHT));
+            if (move.getEndPosition().getRow() == 1 || move.getEndPosition().getRow() == 8) {
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.QUEEN));
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.BISHOP));
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.ROOK));
+                movesList.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.KNIGHT));
             } else {
                 movesList.add(move);
             }
@@ -134,7 +134,7 @@ public class PieceCalculator {
         for (int i = -1; i < 2; ++i)
             moves.add(new ChessMove(position, new ChessPosition(position.getRow() + yChange, position.getColumn() + i), null));
 
-        if(doubleJump && board.getPiece(moves.get(1).endPosition()) == null) {
+        if(doubleJump && board.getPiece(moves.get(1).getEndPosition()) == null) {
             moves.add(new ChessMove(position, new ChessPosition(position.getRow() + (yChange * 2), position.getColumn()), null));
         }
         return getPromotions(removeIllegalMovesPawn(moves));
