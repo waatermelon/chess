@@ -57,24 +57,29 @@ public class GameCalculator {
         for(int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 ChessPiece current = boardArr[i][j];
-                if(current != null && current.getTeamColor() != team) {
-                    for(ChessMove move: current.pieceMoves(board,
-                            new ChessPosition(i + 1, j + 1))) {
-                        boolean contained = false;
-                        for(ChessPosition pos: enemyPositions) {
-                            if(move.getEndPosition().equals(pos)) {
-                                contained = true;
-                                break;
-                            }
-                        }
-                        if(!contained) {
-                            enemyPositions.add(move.getEndPosition());
-                        }
-                    }
+                if(current == null || current.getTeamColor() == team) {
+                    continue;
                 }
+                allowProduction(current, enemyPositions, i, j);
             }
         }
         return enemyPositions;
+    }
+
+    public void allowProduction(ChessPiece current, ArrayList<ChessPosition> enemyPositions, int i, int j) {
+        for(ChessMove move: current.pieceMoves(board,
+                new ChessPosition(i + 1, j + 1))) {
+            boolean contained = false;
+            for(ChessPosition pos: enemyPositions) {
+                if(move.getEndPosition().equals(pos)) {
+                    contained = true;
+                    break;
+                }
+            }
+            if(!contained) {
+                enemyPositions.add(move.getEndPosition());
+            }
+        }
     }
 
     public ArrayList<ChessMove> getMovePositionNonOverlap(ArrayList<ChessPosition> positions,

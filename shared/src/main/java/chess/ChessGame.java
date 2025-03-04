@@ -81,7 +81,9 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece current = board.getPiece(move.getStartPosition());
-        if(current == null) throw new InvalidMoveException("piece does not exist");
+        if(current == null) {
+            throw new InvalidMoveException("piece does not exist");
+        }
         boolean correctTeam = getTeamTurn() == current.getTeamColor();
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
         System.out.println(move);
@@ -98,9 +100,15 @@ public class ChessGame {
         - set position
         - remove previous position
          */
-        if(!correctTeam) throw new InvalidMoveException("incorrect team moving");
-        if(validMoves.isEmpty()) throw new InvalidMoveException("no valid moves possible for piece");
-        if(!validMoves.contains(move))  throw new InvalidMoveException("move not contained");
+        if(!correctTeam) {
+            throw new InvalidMoveException("incorrect team moving");
+        }
+        if(validMoves.isEmpty()) {
+            throw new InvalidMoveException("no valid moves possible for piece");
+        }
+        if(!validMoves.contains(move)) {
+            throw new InvalidMoveException("move not contained");
+        }
         if(move.getPromotionPiece() != null) {
             ArrayList<ChessMove> possibleMoves = new ArrayList<>(current.pieceMoves(board, move.getStartPosition()));
             boolean promotionPossible = false;
@@ -110,7 +118,9 @@ public class ChessGame {
                     break;
                 }
             }
-            if(!promotionPossible) throw new InvalidMoveException("promotion impossible");
+            if(!promotionPossible) {
+                throw new InvalidMoveException("promotion impossible");
+            }
         }
 
         if(move.getPromotionPiece() != null) {
@@ -156,13 +166,7 @@ public class ChessGame {
      */
     public boolean isInStalemate(TeamColor teamColor) {
         GameCalculator calc = new GameCalculator(board);
-        //TODO, need to see if...
-        /*
-        - King is unable to move
-        - Pieces are unable to move
-        - King has no threats
-         */
-        return calc.isInStalemate(teamColor);//Temp
+        return calc.isInStalemate(teamColor);
     }
 
     /**

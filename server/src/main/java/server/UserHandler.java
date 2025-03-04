@@ -21,8 +21,10 @@ public class UserHandler {
     public Object register(Request request, Response response) throws BadRequestException, AlreadyTakenException {
         UserData userData = serializer.fromJson(request.body(), UserData.class);
         RegisterResult registerResult;
-        if (userData.username() == null || userData.password() == null)
+        if (userData.username() == null || userData.password() == null) {
             throw new BadRequestException("");
+        }
+
 
         try {
             registerResult = userService.register(userData);

@@ -18,8 +18,10 @@ public class AuthService {
     }
 
     public LoginResult login(UserData userData) throws DataAccessException, BadRequestException, UnauthorizedException {
-        if (userData.password() == null || userData.username() == null)
+        if (userData.password() == null || userData.username() == null) {
             throw new BadRequestException("");
+        }
+
         try {
             userDAO.getUser(userData.username(), userData.password());
         } catch(Exception e) {
@@ -34,8 +36,9 @@ public class AuthService {
     }
 
     public void logout(String authToken) throws UnauthorizedException, BadRequestException {
-        if (authToken == null)
+        if (authToken == null) {
             throw new BadRequestException("");
+        }
         AuthData auth;
         try {
             auth = authDAO.getAuth(authToken);

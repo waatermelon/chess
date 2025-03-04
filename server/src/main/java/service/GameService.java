@@ -26,7 +26,8 @@ public class GameService {
         return gameDAO.listGames();
     }
 
-    public int createGame(String authToken, String gameName) throws DataAccessException, UnauthorizedException {
+    public int createGame(String authToken, String gameName)
+            throws DataAccessException, UnauthorizedException {
         try {
             authDAO.getAuth(authToken);
         } catch (Exception e) {
@@ -38,7 +39,8 @@ public class GameService {
         return gameID;
     }
 
-    public void joinGame(String authToken, String playerColor, int gameID) throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
+    public void joinGame(String authToken, String playerColor, int gameID)
+            throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
         AuthData authData;
         try {
             authData = authDAO.getAuth(authToken);
@@ -51,8 +53,10 @@ public class GameService {
         } catch (Exception e) {
             throw new BadRequestException("Error accessing data: " + e.getMessage());
         }
-        if (playerColor == null || (!playerColor.contains("WHITE") && !playerColor.contains("BLACK")))
+        if (playerColor == null || (!playerColor.contains("WHITE") && !playerColor.contains("BLACK"))) {
             throw new BadRequestException("Not given a color");
+        }
+
 
         String whiteUser = game.whiteUsername();
         String blackUser = game.blackUsername();

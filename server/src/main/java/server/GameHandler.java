@@ -31,7 +31,8 @@ public class GameHandler {
         return serializer.toJson(Map.of("games", gamesList));
     }
 
-    public Object createGame(Request request, Response response) throws DataAccessException, UnauthorizedException {
+    public Object createGame(Request request, Response response)
+            throws DataAccessException, UnauthorizedException {
         String authToken = request.headers("authorization");
         CreateGameData createGameData = serializer.fromJson(request.body(), CreateGameData.class);
         int gameID = gameService.createGame(authToken, createGameData.gameName());
@@ -39,7 +40,8 @@ public class GameHandler {
         return "{gameID: " + gameID + "}";
     }
 
-    public Object joinGame(Request request, Response response) throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
+    public Object joinGame(Request request, Response response)
+            throws DataAccessException, UnauthorizedException, BadRequestException, AlreadyTakenException {
         String authToken = request.headers("authorization");
         JoinRequestData jrq = serializer.fromJson(request.body(), JoinRequestData.class);
         gameService.joinGame(authToken, jrq.playerColor(), jrq.gameID());
