@@ -4,15 +4,13 @@ import model.AuthData;
 
 import java.util.ArrayList;
 
-public class MemoryAuthDAO implements AuthDAO{
+public class SQLAuthDAO implements AuthDAO{
 
-    ArrayList<AuthData> db;
-
-    public MemoryAuthDAO(ArrayList<AuthData> initAuthData) {
+    public SQLAuthDAO(ArrayList<AuthData> initAuthData) {
         db = initAuthData;
     }
 
-    public MemoryAuthDAO() {
+    public SQLAuthDAO() {
         db = new ArrayList<AuthData>();
     }
 

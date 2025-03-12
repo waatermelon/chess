@@ -4,15 +4,13 @@ import model.GameData;
 
 import java.util.ArrayList;
 
-public class MemoryGameDAO implements GameDAO {
+public class SQLGameDAO implements GameDAO {
 
-    ArrayList<GameData> db;
-
-    public MemoryGameDAO(ArrayList<GameData> initGameData) {
+    public SQLGameDAO(ArrayList<GameData> initGameData) {
         db = initGameData;
     }
 
-    public MemoryGameDAO() {
+    public SQLGameDAO() {
         db = new ArrayList<GameData>();
     }
 

@@ -4,15 +4,13 @@ import model.UserData;
 
 import java.util.ArrayList;
 
-public class MemoryUserDAO implements UserDAO{
+public class SQLUserDAO implements UserDAO{
 
-    ArrayList<UserData> db;
-
-    public MemoryUserDAO(ArrayList<UserData> initUserData) {
+    public SQLUserDAO(ArrayList<UserData> initUserData) {
         db = initUserData;
     }
 
-    public MemoryUserDAO() {
+    public SQLUserDAO() {
         db = new ArrayList<UserData>();
     }
 
