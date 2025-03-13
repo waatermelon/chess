@@ -3,7 +3,6 @@ package dataaccess;
 import model.AuthData;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class SQLAuthDAO implements AuthDAO{
 
@@ -20,34 +19,70 @@ public class SQLAuthDAO implements AuthDAO{
                 PRIMARY KEY (authToken)
                 )""";
             var conn = DatabaseManager.getConnection();
-            try (var createTableStatement = conn.prepareStatement(statement)) {
-                createTableStatement.executeUpdate();
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
+    // Create
     @Override
     public void createAuth(AuthData authData) throws DataAccessException {
+        var statement = "INSERT into auth (authToken, username) VALUES (?, ?)";
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, authData.username());
+            preparedStatement.setString(2, authData.authToken());
 
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     // Read
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
+        String statement = "SELECT username, authToken FROM auth WHERE authToken = ?";
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, authToken);
+            var result = preparedStatement.executeQuery();
 
+            result.next();
+            var username = result.getString("username");
+            return new AuthData(username, authToken);
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     // Update/Delete
     @Override
     public void deleteAuth(AuthData authData) {
+        String statement = "DELETE FROM auth WHERE authToken = ?";
+        try (var conn = DatabaseManager.getConnection() ) {
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.setString(1, authData.authToken());
 
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     // Delete
     @Override
     public void clear() {
+        String statement = "TRUNCATE auth";
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(statement);
 
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

@@ -21,8 +21,8 @@ public class SQLUserDAO implements UserDAO{
                 PRIMARY KEY (username)
                 )""";
             var conn = DatabaseManager.getConnection();
-            try (var createTableStatement = conn.prepareStatement(statement)) {
-                createTableStatement.executeUpdate();
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e.getMessage());

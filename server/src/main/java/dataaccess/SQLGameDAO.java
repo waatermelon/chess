@@ -23,8 +23,8 @@ public class SQLGameDAO implements GameDAO {
                 PRIMARY KEY (gameID)
                 )""";
             var conn = DatabaseManager.getConnection();
-            try (var createTableStatement = conn.prepareStatement(statement)) {
-                createTableStatement.executeUpdate();
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e.getMessage());
