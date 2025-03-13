@@ -92,7 +92,9 @@ public class SQLGameDAO implements GameDAO {
             preparedStatement.setInt(5, gameData.gameID());
 
             int rowsUpdated = preparedStatement.executeUpdate();
-            if (rowsUpdated == 0) throw new DataAccessException("Item requested to be updated not found");
+            if (rowsUpdated == 0) {
+                throw new DataAccessException("Item requested to be updated not found");
+            }
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
