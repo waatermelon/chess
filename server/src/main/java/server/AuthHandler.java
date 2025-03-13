@@ -23,6 +23,7 @@ public class AuthHandler {
         UserData userData = serializer.fromJson(request.body(), UserData.class);
         LoginResult loginResult = authService.login(userData);
         response.status(200);
+        System.out.println("Logging in");
         return serializer.toJson(loginResult);
     }
 

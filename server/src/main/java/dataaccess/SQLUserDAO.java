@@ -3,6 +3,7 @@ package dataaccess;
 import model.UserData;
 
 import java.sql.SQLException;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class SQLUserDAO implements UserDAO{
 
@@ -34,7 +35,8 @@ public class SQLUserDAO implements UserDAO{
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.setString(1, userData.username());
-            preparedStatement.setString(2, userData.password());
+            preparedStatement.setString(2,
+                    BCrypt.hashpw(userData.password(), BCrypt.gensalt(6)));
             preparedStatement.setString(3, userData.email());
 
             preparedStatement.executeUpdate();
@@ -46,15 +48,21 @@ public class SQLUserDAO implements UserDAO{
     // Read
     @Override
     public void getUser(String username, String password) throws DataAccessException {
-        String statement = "SELECT username, password, email FROM user WHERE " +
-                "username = ? AND password = ?";
+        String statement = "SELECT username, password, email FROM user WHERE username = ?";
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement(statement);
             preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
 
             var result = preparedStatement.executeQuery();
-            result.next();
+            if (!result.next()) {
+                throw new DataAccessException("No user with matching credentials");
+            }
+
+            String storedHash = result.getString("password");
+            if (!BCrypt.checkpw(password, storedHash)) {
+                throw new DataAccessException("No user with matching credentials");
+            }
+
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }

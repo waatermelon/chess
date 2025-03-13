@@ -7,11 +7,18 @@ import service.UserService;
 import spark.*;
 
 public class Server {
+    ///*
+
 
     AuthDAO authDAO = new SQLAuthDAO();
     GameDAO gameDAO = new SQLGameDAO();
     UserDAO userDAO = new SQLUserDAO();
-
+    //*/
+    /*
+    AuthDAO authDAO = new MemoryAuthDAO();
+    GameDAO gameDAO = new MemoryGameDAO();
+    UserDAO userDAO = new MemoryUserDAO();
+    */
     AuthService authService = new AuthService(authDAO, userDAO);
     GameService gameService = new GameService(authDAO, gameDAO);
     UserService userService = new UserService(authDAO, userDAO);
@@ -26,7 +33,6 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-
         Spark.delete("/db", this::clear);
         Spark.post("/user", userHandler::register);
         Spark.post("/session", authHandler::login);

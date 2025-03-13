@@ -49,7 +49,9 @@ public class StandardAPITests {
         serverFacade.clear();
 
         //one user already logged in
+        System.out.println("Starting register");
         TestAuthResult regResult = serverFacade.register(existingUser);
+        System.out.println("Finished register");
         existingAuth = regResult.getAuthToken();
     }
 

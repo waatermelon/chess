@@ -15,7 +15,9 @@ public class MemoryAuthDAO implements AuthDAO{
 
     @Override
     public void createAuth(AuthData authData) throws DataAccessException {
+        System.out.println("creating auth");
         for (AuthData dbAuthData: db) {
+            System.out.println(authData);
             if (dbAuthData.equals(authData)) {
                 throw new DataAccessException("");
             }
