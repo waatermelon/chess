@@ -17,7 +17,7 @@ public class SQLAuthDAO implements AuthDAO{
                 CREATE TABLE IF NOT EXISTS auth (
                 username VARCHAR(64),
                 authToken VARCHAR(64),
-                
+                PRIMARY KEY (authToken)
                 )""";
             var conn = DatabaseManager.getConnection();
             try (var createTableStatement = conn.prepareStatement(statement)) {

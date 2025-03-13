@@ -14,14 +14,14 @@ public class SQLGameDAO implements GameDAO {
 
         try {
             var statement = """            
-                    CREATE TABLE IF NOT EXISTS game (
-                                    `gameID` INT NOT NULL AUTO_INCREMENT,
-                                    `whiteUsername` VARCHAR(64),
-                                    `blackUsername` VARCHAR(64),
-                                    `gameName` VARCHAR(64) NOT NULL,
-                                    `game` TEXT NOT NULL,
-                                    PRIMARY KEY (gameID)
-                                    )""";
+                CREATE TABLE IF NOT EXISTS game (
+                gameID INT NOT NULL AUTO_INCREMENT,
+                whiteUsername VARCHAR(64),
+                blackUsername VARCHAR(64),
+                gameName VARCHAR(64) NOT NULL,
+                game TEXT NOT NULL,
+                PRIMARY KEY (gameID)
+                )""";
             var conn = DatabaseManager.getConnection();
             try (var createTableStatement = conn.prepareStatement(statement)) {
                 createTableStatement.executeUpdate();

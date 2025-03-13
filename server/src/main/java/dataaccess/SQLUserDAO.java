@@ -14,11 +14,12 @@ public class SQLUserDAO implements UserDAO{
 
         try {
             var statement = """            
-                    CREATE TABLE IF NOT EXISTS USER (
-                                    username VARCHAR(255),
-                                    authToken VARCHAR(255),
-                                    PRIMARY KEY (authToken)
-                                    )""";
+                CREATE TABLE IF NOT EXISTS user (
+                username VARCHAR(64) NOT NULL,
+                password VARCHAR(64) NOT NULL,
+                email VARCHAR(64),
+                PRIMARY KEY (username)
+                )""";
             var conn = DatabaseManager.getConnection();
             try (var createTableStatement = conn.prepareStatement(statement)) {
                 createTableStatement.executeUpdate();
