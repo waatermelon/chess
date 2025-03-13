@@ -7,24 +7,24 @@ import java.util.ArrayList;
 
 public class SQLAuthDAO implements AuthDAO{
 
-    public SQLAuthDAO() throws DataAccessException {
+    public SQLAuthDAO() {
         try { DatabaseManager.createDatabase(); } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
 
         try {
-            var statement = """            
-                    CREATE TABLE IF NOT EXISTS AUTHENTICATION (
-                                    username VARCHAR(255),
-                                    authToken VARCHAR(255),
-                                    PRIMARY KEY (authToken)
-                                    )""";
+            var statement = """
+                CREATE TABLE IF NOT EXISTS auth (
+                username VARCHAR(64),
+                authToken VARCHAR(64),
+                
+                )""";
             var conn = DatabaseManager.getConnection();
             try (var createTableStatement = conn.prepareStatement(statement)) {
                 createTableStatement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 

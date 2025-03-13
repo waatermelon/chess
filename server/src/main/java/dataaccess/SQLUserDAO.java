@@ -7,9 +7,9 @@ import java.util.ArrayList;
 
 public class SQLUserDAO implements UserDAO{
 
-    public SQLUserDAO() throws DataAccessException {
+    public SQLUserDAO() {
         try { DatabaseManager.createDatabase(); } catch (DataAccessException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
 
         try {
@@ -24,7 +24,7 @@ public class SQLUserDAO implements UserDAO{
                 createTableStatement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
