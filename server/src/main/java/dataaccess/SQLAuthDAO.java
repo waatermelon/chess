@@ -19,9 +19,8 @@ public class SQLAuthDAO implements AuthDAO{
                 PRIMARY KEY (authToken)
                 )""";
             var conn = DatabaseManager.getConnection();
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.executeUpdate();
-            }
+            var preparedStatement = conn.prepareStatement(statement);
+            preparedStatement.executeUpdate();
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
