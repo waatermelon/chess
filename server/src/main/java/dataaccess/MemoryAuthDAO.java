@@ -8,9 +8,6 @@ public class MemoryAuthDAO implements AuthDAO{
 
     ArrayList<AuthData> db;
 
-    public MemoryAuthDAO(ArrayList<AuthData> initAuthData) {
-        db = initAuthData;
-    }
 
     public MemoryAuthDAO() {
         db = new ArrayList<AuthData>();

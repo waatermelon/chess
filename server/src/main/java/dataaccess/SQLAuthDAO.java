@@ -2,53 +2,52 @@ package dataaccess;
 
 import model.AuthData;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class SQLAuthDAO implements AuthDAO{
 
-    public SQLAuthDAO(ArrayList<AuthData> initAuthData) {
-        db = initAuthData;
-    }
+    public SQLAuthDAO() throws DataAccessException {
+        try { DatabaseManager.createDatabase(); } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
 
-    public SQLAuthDAO() {
-        db = new ArrayList<AuthData>();
+        try {
+            var statement = """            
+                    CREATE TABLE IF NOT EXISTS AUTHENTICATION (
+                                    username VARCHAR(255),
+                                    authToken VARCHAR(255),
+                                    PRIMARY KEY (authToken)
+                                    )""";
+            var conn = DatabaseManager.getConnection();
+            try (var createTableStatement = conn.prepareStatement(statement)) {
+                createTableStatement.executeUpdate();
+            }
+        } catch (DataAccessException | SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
     public void createAuth(AuthData authData) throws DataAccessException {
-        for (AuthData dbAuthData: db) {
-            if (dbAuthData.equals(authData)) {
-                throw new DataAccessException("");
-            }
-        }
-        db.add(authData);
+
     }
 
     // Read
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        for (AuthData dbAuthData: db) {
-            if (dbAuthData.authToken().equals(authToken)) {
-                return dbAuthData;
-            }
-        }
-        throw new DataAccessException("Token was not found.");
+
     }
 
     // Update/Delete
     @Override
     public void deleteAuth(AuthData authData) {
-        for (int i = 0; i < db.size(); ++i) {
-            if (db.get(i).equals(authData)) {
-                db.remove(i);
-                return;
-            }
-        }
+
     }
 
     // Delete
     @Override
     public void clear() {
-        db.clear();
+
     }
 }

@@ -8,10 +8,6 @@ public class MemoryUserDAO implements UserDAO{
 
     ArrayList<UserData> db;
 
-    public MemoryUserDAO(ArrayList<UserData> initUserData) {
-        db = initUserData;
-    }
-
     public MemoryUserDAO() {
         db = new ArrayList<UserData>();
     }

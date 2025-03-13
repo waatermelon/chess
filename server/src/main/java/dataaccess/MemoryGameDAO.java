@@ -8,10 +8,6 @@ public class MemoryGameDAO implements GameDAO {
 
     ArrayList<GameData> db;
 
-    public MemoryGameDAO(ArrayList<GameData> initGameData) {
-        db = initGameData;
-    }
-
     public MemoryGameDAO() {
         db = new ArrayList<GameData>();
     }
