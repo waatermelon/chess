@@ -90,7 +90,7 @@ public class SQLGameDAO implements GameDAO {
             preparedStatement.setString(3, gameData.gameName());
             preparedStatement.setString(4, serializer.toJson(gameData.game()));
             preparedStatement.setInt(5, gameData.gameID());
-            // setup for next part
+            // setup for next
             // testin
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated == 0) {
