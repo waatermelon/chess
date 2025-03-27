@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -35,7 +36,7 @@ public class GameService {
         }
 
         int gameID = gameDAO.getNextGameID();
-        gameDAO.createGame(new GameData(gameID, null, null, gameName, null));
+        gameDAO.createGame(new GameData(gameID, null, null, gameName, new ChessGame()));
         return gameID;
     }
 
@@ -53,10 +54,12 @@ public class GameService {
         } catch (Exception e) {
             throw new BadRequestException("Error accessing data: " + e.getMessage());
         }
-        if (playerColor == null || (!playerColor.contains("WHITE") && !playerColor.contains("BLACK"))) {
+        if (playerColor == null) {
+            return;
+        }
+        if ((!playerColor.contains("WHITE") && !playerColor.contains("BLACK"))) {
             throw new BadRequestException("Not given a color");
         }
-
 
         String whiteUser = game.whiteUsername();
         String blackUser = game.blackUsername();

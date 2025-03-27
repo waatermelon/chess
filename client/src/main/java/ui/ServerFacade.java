@@ -2,13 +2,11 @@ package ui;
 
 
 import com.google.gson.Gson;
-import model.GameData;
-import model.GamesWrapper;
+import com.google.gson.internal.LinkedTreeMap;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Map;
@@ -21,7 +19,7 @@ public class ServerFacade {
     String authToken;
 
     public ServerFacade(String port) {
-        url = "https://localhost:" + port;
+        url = "http://localhost:" + port;
     }
 
     public boolean register(String username, String password, String email) {
@@ -30,7 +28,6 @@ public class ServerFacade {
                 new String[] {username, password, email});
 
         Map response = createRequest("POST", "/user", jsonBody);
-
         if (response.containsKey("Exception")) {
             return false;
         } else {
@@ -64,40 +61,42 @@ public class ServerFacade {
         }
     }
 
-    public ArrayList<GameData> listGames() {
+    public ArrayList<LinkedTreeMap> listGames() {
         Map response = createRequest("GET", "/game", null);
         if (response.containsKey("Exception")) {
             return null;
         } else {
-            GamesWrapper gamesWrapper = serializer.fromJson((Reader) response, GamesWrapper.class);
-            return gamesWrapper.games();
+            String jsonResponse = new Gson().toJson(response);
+            return (ArrayList<LinkedTreeMap>) response.get("games");
         }
     }
 
-    public boolean joinGame(String playerColor, int gameID) {
+    public boolean joinGame(String playerColor, double gameID) {
         String jsonBody = convertArgsToJson(
                 new String[] {"playerColor", "gameID"},
-                new String[] {playerColor, Integer.toString(gameID)});
-
+                new String[] {playerColor, Integer.toString((int) gameID)});
         Map response = createRequest("PUT", "/game", jsonBody);
         return !response.containsKey("Exception");
     }
 
-    public boolean viewGame(int gameID) {
+    public boolean viewGame(double gameID) {
         String jsonBody = convertArgsToJson(
                 new String[] {"gameID"},
-                new String[] {Integer.toString(gameID)});
+                new String[] {Integer.toString((int) gameID)});
 
         Map response = createRequest("PUT", "/game", jsonBody);
         return !response.containsKey("Exception");
     }
 
-    public int createGame(String name) {
-        Map response = createRequest("POST", "/game", null);
+    public double createGame(String name) {
+        String jsonBody = convertArgsToJson(
+                new String[] {"gameName"},
+                new String[] {name});
+        Map response = createRequest("POST", "/game", jsonBody);
         if (response.containsKey("Exception")) {
             return 0;
         } else {
-            return (int) response.get("gameID");
+            return (double) response.get("gameID");
         }
     }
 
@@ -107,20 +106,16 @@ public class ServerFacade {
             URI uri = new URI(url + path);
             HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
             http.setRequestMethod(method);
-
             addAuth(http);
             addBody(http, body);
             http.connect();
-
             if (wasException(http)) {
                 return Map.of("Exception", 400);
             }
-
             try (InputStream respBody = http.getInputStream()) {
                 InputStreamReader inputStreamReader = new InputStreamReader(respBody);
                 returnValues = new Gson().fromJson(inputStreamReader, Map.class);
             }
-
         } catch (URISyntaxException | IOException e) {
             return Map.of("Exception", 400);
         }
@@ -132,9 +127,12 @@ public class ServerFacade {
         sb.append("{");
         for(int i = 0; i < keys.length; ++i) {
             sb.append(keys[i]).append(": ").append(values[i]);
+            if (i < keys.length - 1) {
+                sb.append(", ");
+            }
         }
         sb.append("}");
-        return serializer.toJson(sb.toString());
+        return sb.toString();
     }
 
     private void addAuth(HttpURLConnection http) {

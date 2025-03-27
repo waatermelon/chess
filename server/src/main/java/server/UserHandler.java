@@ -30,7 +30,6 @@ public class UserHandler {
         } catch (Exception e) {
             throw new AlreadyTakenException("");
         }
-        System.out.println("registering");
         response.status(200);
         return new Gson().toJson(registerResult);
     }

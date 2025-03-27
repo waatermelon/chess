@@ -48,6 +48,16 @@ public class Server {
         Spark.awaitStop();
     }
 
+    public void clear() {
+        try {
+            authHandler.clear();
+            userHandler.clear();
+            gameHandler.clear();
+        } catch (Exception e) {
+            System.out.println("error server on clear");
+        }
+    }
+
     private Object clear(Request request, Response response) throws Exception {
         authHandler.clear();
         gameHandler.clear();
