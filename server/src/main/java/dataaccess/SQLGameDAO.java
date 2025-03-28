@@ -47,7 +47,6 @@ public class SQLGameDAO implements GameDAO {
             preparedStatement.setString(2, gameData.whiteUsername());
             preparedStatement.setString(3, gameData.blackUsername());
             preparedStatement.setString(4, gameData.gameName());
-            System.out.println(gameData);
             preparedStatement.setString(5, serializer.toJson(gameData.game()));
 
             preparedStatement.executeUpdate();
