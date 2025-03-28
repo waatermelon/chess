@@ -111,53 +111,57 @@ public class ChessLoop {
                     }
                     break;
                 case "join":
-                    if (amLoggedIn()) {
-                        if(args.length < 3 ||
-                                !args[1].matches("(?i)BLACK|WHITE") ||
-                                !args[2].matches("^-?\\d+$")) {
-                            System.out.println("Illegible Join Command. Type \"help\" for a Guide.");
-                            continue;
-                        }
-                        String teamColor = args[1].toUpperCase();
-                        double gameNum = Double.parseDouble(args[2]);
-                        if (facade.joinGame(teamColor, gameNum)) {
-                            System.out.println("Successfully joined game!");
-                            boardPrinter.printBoard(games.get((int) gameNum),
-                                    (teamColor.equals("WHITE")) ?
-                                            ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
-                        } else {
-                            System.out.println("Unable to join game. Try again later.");
-                        }
-                    } else {
-                        System.out.println("Log in to use this command.");
-                    }
+                    runJoin(args);
                     break;
                 case "view":
-                    if (amLoggedIn()) {
-                        if(args.length < 2 || !args[1].matches("^-?\\d+$")) {
-                            System.out.println("Illegible Join Command. Type \"help\" for a Guide.");
-                            continue;
-                        }
-                        double gameNumber = Double.parseDouble(args[1]);
-
-                        if (facade.viewGame(gameNumber)) {
-                            System.out.println("Successfully viewing game!");
-                            // get game
-                            // print game
-
-                            GameData game = games.get(((int) gameNumber) - 1);
-                            boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);
-                        } else {
-                            System.out.println("Unable to view game. Try again later.");
-                        }
-                    } else {
-                        System.out.println("Log in to use this command.");
-                    }
+                    runView(args);
                     break;
                 default:
                     System.out.println("Command not found. Type \"help\" for a list of Valid Commands.");
                     break;
             }
+        }
+    }
+
+    private void  runView(String[] args) {
+        if (amLoggedIn()) {
+            if(args.length < 2 || !args[1].matches("^-?\\d+$")) {
+                System.out.println("Illegible Join Command. Type \"help\" for a Guide.");
+                return;
+            }
+            double gameNumber = Double.parseDouble(args[1]);
+            if (facade.viewGame(gameNumber)) {
+                System.out.println("Successfully viewing game!");
+                GameData game = games.get(((int) gameNumber) - 1);
+                boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);
+            } else {
+                System.out.println("Unable to view game. Try again later.");
+            }
+        } else {
+            System.out.println("Log in to use this command.");
+        }
+    }
+
+    private void runJoin(String[] args) {
+        if (amLoggedIn()) {
+            if(args.length < 3 ||
+                    !args[1].matches("(?i)BLACK|WHITE") ||
+                    !args[2].matches("^-?\\d+$")) {
+                System.out.println("Illegible Join Command. Type \"help\" for a Guide.");
+                return;
+            }
+            String teamColor = args[1].toUpperCase();
+            double gameNum = Double.parseDouble(args[2]);
+            if (facade.joinGame(teamColor, gameNum)) {
+                System.out.println("Successfully joined game!");
+                boardPrinter.printBoard(games.get((int) gameNum),
+                        (teamColor.equals("WHITE")) ?
+                                ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+            } else {
+                System.out.println("Unable to join game. Try again later.");
+            }
+        } else {
+            System.out.println("Log in to use this command.");
         }
     }
 
