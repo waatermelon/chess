@@ -55,8 +55,13 @@ public class GameService {
             throw new BadRequestException("Error accessing data: " + e.getMessage());
         }
         if (playerColor == null) {
+            throw new BadRequestException("Not given a color");
+        }
+        if (playerColor.equals("SPECTATOR")) {
             return;
         }
+        System.out.println(playerColor);
+
         if ((!playerColor.contains("WHITE") && !playerColor.contains("BLACK"))) {
             throw new BadRequestException("Not given a color");
         }

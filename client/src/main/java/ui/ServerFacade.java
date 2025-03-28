@@ -81,8 +81,8 @@ public class ServerFacade {
 
     public boolean viewGame(double gameID) {
         String jsonBody = convertArgsToJson(
-                new String[] {"gameID"},
-                new String[] {Integer.toString((int) gameID)});
+                new String[] {"playerColor", "gameID"},
+                new String[] {"SPECTATOR", Integer.toString((int) gameID)});
 
         Map response = createRequest("PUT", "/game", jsonBody);
         return !response.containsKey("Exception");
