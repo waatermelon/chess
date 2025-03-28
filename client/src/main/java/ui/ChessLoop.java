@@ -26,15 +26,19 @@ public class ChessLoop {
     ServerFacade facade;
 
     ArrayList<GameData> games;
+    BoardPrinter boardPrinter;
 
     public ChessLoop(int port, boolean debug) {
         this.debug = debug;
         if(debug) {
             debugServer = new Server();
+            //debugServer.clear();
             debugServer.run(port);
             System.out.println("Running Server and Client on Port: " + port);
         }
         facade = new ServerFacade(Integer.toString(port));
+        this.games = new ArrayList<GameData>();
+        this.boardPrinter = new BoardPrinter();
     }
 
     public void run() {
@@ -100,8 +104,13 @@ public class ChessLoop {
                         printGames(listedGames);
                         games.clear();
                         for (LinkedTreeMap listedGame : listedGames) {
-                            games.add(convertDataToGame(listedGame));
-
+                            int gameID = (int)(double) listedGame.get("gameID");
+                            String whiteUser = (String) listedGame.get("whiteUsername");
+                            String blackUser = (String) listedGame.get("blackUsername");
+                            String gameName = (String) listedGame.get("gameName");
+                            ChessGame game = convertDataToGame(listedGame.get("game"));
+                            GameData gameData = new GameData(gameID, blackUser, whiteUser, gameName, game);
+                            games.add(gameData);
                         }
                     } else {
                         System.out.println("Log in to use this command.");
@@ -131,8 +140,13 @@ public class ChessLoop {
                             System.out.println("Illegible Join Command. Type \"help\" for a Guide.");
                             continue;
                         }
-                        if (facade.joinGame(args[1].toUpperCase(), Double.parseDouble(args[2]))) {
+                        String teamColor = args[1].toUpperCase();
+                        double gameNum = Double.parseDouble(args[2]);
+                        if (facade.joinGame(teamColor, gameNum)) {
                             System.out.println("Successfully joined game!");
+                            boardPrinter.printBoard(games.get((int) gameNum),
+                                    (teamColor.equals("WHITE")) ?
+                                            ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
                         } else {
                             System.out.println("Unable to join game. Try again later.");
                         }
@@ -153,7 +167,8 @@ public class ChessLoop {
                             // get game
                             // print game
 
-
+                            GameData game = games.get(((int) gameNumber) - 1);
+                            boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);
                         } else {
                             System.out.println("Unable to view game. Try again later.");
                         }
@@ -267,7 +282,7 @@ public class ChessLoop {
                 board.addPiece(position, piece);
             }
         }
-        game.setBoard(new ChessBoard());
+        game.setBoard(board);
         return game;
     }
 
@@ -292,8 +307,13 @@ public class ChessLoop {
                 break;
             case "QUEEN":
                 type = ChessPiece.PieceType.QUEEN;
+                break;
             case "KING":
                 type = ChessPiece.PieceType.KING;
+                break;
+            case "PAWN":
+                type = ChessPiece.PieceType.PAWN;
+                break;
         }
         return new ChessPiece(teamColor, type);
     }
