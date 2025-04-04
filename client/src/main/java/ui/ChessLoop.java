@@ -105,6 +105,18 @@ public class ChessLoop {
                             System.out.println("Unable to create game. Try again.");
                         } else {
                             System.out.println("Created game with unique ID: " + (int) gameID);
+
+                            ArrayList<LinkedTreeMap> listedGames = facade.listGames();
+                            games.clear();
+                            for (LinkedTreeMap listedGame : listedGames) {
+                                int newGameID = (int)(double) listedGame.get("gameID");
+                                String whiteUser = (String) listedGame.get("whiteUsername");
+                                String blackUser = (String) listedGame.get("blackUsername");
+                                String gameName = (String) listedGame.get("gameName");
+                                ChessGame game = convertDataToGame(listedGame.get("game"));
+                                GameData gameData = new GameData(newGameID, blackUser, whiteUser, gameName, game);
+                                games.add(gameData);
+                            }
                         }
                     } else {
                         System.out.println("Log in to use this command.");
@@ -152,9 +164,11 @@ public class ChessLoop {
             }
             String teamColor = args[1].toUpperCase();
             double gameNum = Double.parseDouble(args[2]);
+
             if (facade.joinGame(teamColor, gameNum)) {
                 System.out.println("Successfully joined game!");
-                boardPrinter.printBoard(games.get((int) gameNum),
+
+                boardPrinter.printBoard(games.get((int) gameNum - 1),
                         (teamColor.equals("WHITE")) ?
                                 ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
             } else {
@@ -179,7 +193,7 @@ public class ChessLoop {
             return new String[0];
         }
         String[] args = input.split(" ");
-        return args;
+        return args;//test
     }
 
     public boolean gaurdClause(String[] args) {
@@ -199,8 +213,8 @@ public class ChessLoop {
         sb.append("\tlogout - logs player out\n");
         sb.append("\tcreate <GAME NAME> - creates a new chess game\n");
         sb.append("\tlist - lists all available games\n");
-        sb.append("\tjoin <PLAYERCOLOR> <GAMEID> - joins game as player\n");
-        sb.append("\tview <GAMEID> - joins game as spectator\n");
+        sb.append("\tjoin <PLAYERCOLOR> <GAMENUMBER> - joins game as player\n");
+        sb.append("\tview <GAMENUMBER> - joins game as spectator\n");
 
         System.out.println(sb.toString());
         System.out.print(RESET_TEXT_COLOR);
@@ -221,8 +235,8 @@ public class ChessLoop {
             gameIterator++;
             int gameID = (int) Math.floor((double) game.get("gameID"));
             String gameName = String.valueOf(game.get("gameName"));
-            sb.append("Game #").append(gameIterator).append(", Game ID: ")
-                    .append(gameID).append(", Game Name: ").append(gameName).append("\n");
+            sb.append("Game #").append(gameIterator)
+                    .append(", Game Name: ").append(gameName).append("\n");
             String whiteUser = String.valueOf(game.get("whiteUsername"));
             String blackUser = String.valueOf(game.get("blackUsername"));
             sb.append("\tWhite User: ").append((whiteUser == "null") ? "" : whiteUser);
