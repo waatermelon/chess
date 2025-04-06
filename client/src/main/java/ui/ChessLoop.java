@@ -9,72 +9,6 @@ import model.GameData;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Scanner;
-
-import static ui.EscapeSequences.*;
-
-public class ChessLoop {
-    Scanner scanner;
-    volatile boolean running;
-    ServerFacade facade;
-
-    ArrayList<GameData> games;
-    BoardPrinter boardPrinter;
-
-    public ChessLoop(int port, boolean debug) {
-        facade = new ServerFacade(Integer.toString(port));
-        this.games = new ArrayList<GameData>();
-        this.boardPrinter = new BoardPrinter();
-    }
-
-    public void run() {
-        running = true;
-        scanner = new Scanner(System.in);
-        System.out.println("♕ CS 240 Chess - Type \"help\" for Commands ♕");
-        while (running) {
-            String[] args = getInput();
-            if (!gaurdClause(args)) {
-                System.out.println("Please Enter a Valid Command. Type \"help\" for Commands.");
-            }
-
-            switch (args[0]) {
-                case "help":
-                    printHelp();
-                    break;
-
-                case "quit": case "exit":
-                    exit();
-                    break;
-
-                case "login":
-                    if(args.length < 3) {
-                        System.out.println("Illegible Login Command. Type \"help\" for a Guide.");
-                        continue;
-                    }
-                    if (facade.login(args[1], args[2])) {
-                        System.out.println("Logged in Successfully! Have fun!");
-                    } else {
-                        System.out.println("Login Unsuccessful. Please Retry.");
-                    }
-                    break;
-
-                case "register":
-                    if(args.length < 4) {
-                        System.out.println("Illegible Register Command. Type \"help\" for a Guide.");
-                        continue;
-                    }
-                    if (facade.register(args[1], args[2], args[3])) {
-                        System.out.println("Registered Successfully! Have fun!");
-                    } else {
-                        System.out.println("Register Unsuccessful. Please Retry.");
-                    }
-                    break;
-                case "logout":
-                    if (facade.logout()) {
-                        System.out.println("Logged Out Successfully!");
-                    } else {
-                        System.out.println("You are not Logged In.");
-                    }
                     break;
                 case "list":
                     if (amLoggedIn()) {
@@ -193,7 +127,7 @@ public class ChessLoop {
             return new String[0];
         }
         String[] args = input.split(" ");
-        return args;//test
+        return args;
     }
 
     public boolean gaurdClause(String[] args) {
