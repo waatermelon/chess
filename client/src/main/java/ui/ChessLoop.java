@@ -135,6 +135,44 @@ public class ChessLoop {
         }
     }
 
+    private void runGame(boolean viewing) {
+        boolean gameRunning = true;
+
+        while (gameRunning) {
+            String[] args = getInput();
+            if (!gaurdClause(args)) {
+                System.out.println("Please Enter a Valid Command. Type \"help\" for Commands.");
+            }
+            //TODO implement into actual loop through join and view funcs
+            switch(args[0]) {
+                case "help":
+                    //remove move and resign if not viewing
+                    //TODO implement through this file
+                    break;
+                case "redraw":
+                    //TODO implement through board-printer
+                    break;
+                case "leave":
+                    //TODO implement through server facade
+                    break;
+                case "move":
+                    //only allowed if not viewing
+                    //TODO implement through server facade
+                    break;
+                case "resign":
+                    //only allowed if not viewing
+                    //TODO implement through server facade
+                    break;
+                case "highlight":
+                    //TODO implement through board-printer
+                    break;
+                default:
+                    System.out.println("Please Enter a Valid Command. Type \"help\" for Commands.");
+                    break;
+            }
+        }
+    }
+
     private void  runView(String[] args) {
         if (amLoggedIn()) {
             if(args.length < 2 || !args[1].matches("^-?\\d+$")) {
