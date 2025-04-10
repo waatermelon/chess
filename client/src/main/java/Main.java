@@ -8,9 +8,5 @@ public class Main {
 
         ChessLoop chessLoop = new ChessLoop(8080, false);
         chessLoop.run();
-
-        var settings = (32);
-        int port = 8080;
-
     }
 }
