@@ -12,3 +12,4 @@ public class UserGameCommand {
     public String authToken;
     public Integer gameID;
 }
+
