@@ -66,7 +66,15 @@ public class WebSocketHandler {
             // viewer
             System.out.println("player joined game as VIEWER!");
             Server.sessions.put(session, data.getGameID());
-
+            MessageExtension message = new MessageExtension(
+                    ServerMessage.ServerMessageType.NOTIFICATION,
+                    "whut"
+            );
+            try {
+                sendMessagetoGame(session, message);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
         }
     }
 
@@ -90,17 +98,20 @@ public class WebSocketHandler {
 
         for (Session serverSession : Server.sessions.keySet()) {
             if (Server.sessions.get(serverSession) == -1) {
+                System.out.println("exited on non session");
                 continue;
             }
             if (!Objects.equals(Server.sessions.get(serverSession), Server.sessions.get(session))) {
+                System.out.println("exited on not same gameID" + Server.sessions.get(serverSession) + " : " + Server.sessions.get(session));
                 continue;
             }
             if (serverSession == session) {
+                System.out.println("exited on being the sender");
                 continue;
             }
             // end guard clause
             System.out.println("sent message to a player!");
-            sendMessage(session, message);
+            sendMessage(serverSession, message);
         }
     }
 }

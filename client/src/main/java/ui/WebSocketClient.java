@@ -18,6 +18,8 @@ public class WebSocketClient extends Endpoint {
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, uri);
+
+
         } catch (URISyntaxException | DeploymentException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -26,10 +28,15 @@ public class WebSocketClient extends Endpoint {
     public void onOpen(Session session, EndpointConfig config) {
         System.out.println("opened session successfully!"); //TODO TESTING
         this.session = session;
+        session.addMessageHandler(new MessageHandler.Whole<String>() {
+            @Override
+            public void onMessage(String message) {
+                clientMessaged(message);
+            }
+        });
     }
 
-    @OnMessage
-    public void onMessage(String message) {
+    private void clientMessaged(String message) {
         System.out.println("received message successfully!"); //TODO TESTING
         System.out.println(message);
 
