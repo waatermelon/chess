@@ -8,13 +8,13 @@ import javax.websocket.*;
 
 
 @ClientEndpoint
-public class WebSocketClient {
+public class WebSocketClient extends Endpoint {
 
     private Session session;
 
     public WebSocketClient(String port) {
         try {
-            URI uri = new URI("ws://localhost:" + port + "/connect");
+            URI uri = new URI("ws://localhost:" + port + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, uri);
@@ -23,8 +23,7 @@ public class WebSocketClient {
         }
     }
 
-    @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session, EndpointConfig config) {
         System.out.println("opened session successfully!"); //TODO TESTING
         this.session = session;
     }

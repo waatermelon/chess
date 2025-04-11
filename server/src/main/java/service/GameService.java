@@ -60,7 +60,6 @@ public class GameService {
         if (playerColor.equals("SPECTATOR")) {
             return;
         }
-        System.out.println(playerColor);
 
         if ((!playerColor.contains("WHITE") && !playerColor.contains("BLACK"))) {
             throw new BadRequestException("Not given a color");

@@ -5,7 +5,9 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.internal.LinkedTreeMap;
+import model.AuthData;
 import model.GameData;
+import websocket.commands.UserGameCommand;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -17,6 +19,8 @@ public class ChessLoop {
     Scanner scanner;
     volatile boolean running;
     ServerFacade facade;
+    GameData currentGame;
+    ChessGame.TeamColor currentColor;
 
     ArrayList<GameData> games;
     BoardPrinter boardPrinter;
@@ -73,7 +77,7 @@ public class ChessLoop {
                     if (facade.logout()) {
                         System.out.println("Logged Out Successfully!");
                     } else {
-                        System.out.println("You are not Logged In.");
+                        System.out.println("Log in to use this command.");
                     }
                     break;
                 case "list":
@@ -104,7 +108,7 @@ public class ChessLoop {
                         if (gameID == 0) {
                             System.out.println("Unable to create game. Try again.");
                         } else {
-                            System.out.println("Created game with unique ID: " + (int) gameID);
+                            System.out.println("Created game sucessfuly!");
 
                             ArrayList<LinkedTreeMap> listedGames = facade.listGames();
                             games.clear();
@@ -136,6 +140,16 @@ public class ChessLoop {
     }
 
     private void runGame(boolean viewing) {
+        facade.WebSocketConnection();
+        int gameID = (int) currentGame.gameID();
+        if (viewing) {
+            System.out.println("joining as viewer");
+            facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID);
+        } else {
+            System.out.println("joiing as player");
+            facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID, currentColor, null);
+        }
+
         boolean gameRunning = true;
 
         while (gameRunning) {
@@ -143,17 +157,17 @@ public class ChessLoop {
             if (!gaurdClause(args)) {
                 System.out.println("Please Enter a Valid Command. Type \"help\" for Commands.");
             }
-            //TODO implement into actual loop through join and view funcs
+
             switch(args[0]) {
                 case "help":
-                    //remove move and resign if not viewing
-                    //TODO implement through this file
+                    printWSHelp(viewing);
                     break;
                 case "redraw":
-                    //TODO implement through board-printer
+                    boardPrinter.printBoard(currentGame, currentColor);
                     break;
                 case "leave":
                     //TODO implement through server facade
+                    runLeave(args);
                     break;
                 case "move":
                     //only allowed if not viewing
@@ -180,12 +194,17 @@ public class ChessLoop {
                 return;
             }
             double gameNumber = Double.parseDouble(args[1]);
-            if (facade.viewGame(gameNumber)) {
+            if (facade.viewGame(gameNumber) && games.size() > (int) gameNumber - 1) {
                 System.out.println("Successfully viewing game!");
                 //TODO implement runGame
                 GameData game = games.get(((int) gameNumber) - 1);
+                currentGame = games.get((int) gameNumber - 1);
+                currentColor = ChessGame.TeamColor.WHITE;
                 boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);
+                runGame(true);
             } else {
+                currentColor = ChessGame.TeamColor.WHITE;
+                currentGame = null;
                 System.out.println("Unable to view game. Try again later.");
             }
         } else {
@@ -204,18 +223,30 @@ public class ChessLoop {
             String teamColor = args[1].toUpperCase();
             double gameNum = Double.parseDouble(args[2]);
 
-            if (facade.joinGame(teamColor, gameNum)) {
+            if (facade.joinGame(teamColor, gameNum) && games.size() > (int) gameNum - 1) {
                 System.out.println("Successfully joined game!");
                 //TODO implement runGame
+                currentGame = games.get((int) gameNum - 1);
+                currentColor = (teamColor.equals("WHITE") ?
+                        ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
                 boardPrinter.printBoard(games.get((int) gameNum - 1),
                         (teamColor.equals("WHITE")) ?
                                 ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+                runGame(false);
             } else {
+                currentGame = null;
+                currentColor = ChessGame.TeamColor.WHITE;
                 System.out.println("Unable to join game. Try again later.");
             }
         } else {
             System.out.println("Log in to use this command.");
         }
+    }
+
+    private void runLeave(String[] args) {
+        //TODO disconnect websocket
+        //TODO leave game
+
     }
 
     public void exit() {
@@ -242,22 +273,44 @@ public class ChessLoop {
         return true;
     }
 
+    private void printWSHelp(boolean viewing) {
+        System.out.print(SET_TEXT_COLOR_BLUE);
+        StringBuilder sb = new StringBuilder();
+        sb.append("\thelp - shows all available commands\n");
+
+        if (!viewing) {
+            sb.append("\tmove <FROM POS> <TO POS> - Moves a piece on the board (example pos: a1)\n");
+            sb.append("\tresign - resigns the game\n");
+        }
+
+        sb.append("\tredraw - redraws the game\n");
+        sb.append("\tleave - exits the current game\n");
+        sb.append("\thighlight <PIECE POS> - highlights available moves for piece\n");
+
+        System.out.println(sb.toString());
+        System.out.print(RESET_TEXT_COLOR);
+    }
+
     private void printHelp() {
         System.out.print(SET_TEXT_COLOR_BLUE);
         StringBuilder sb = new StringBuilder();
         sb.append("\thelp - shows all commands\n");
+
+        if (amLoggedIn()) {
+            sb.append("\tlogout - logs player out\n");
+            sb.append("\tcreate <GAME NAME> - creates a new chess game\n");
+            sb.append("\tjoin <PLAYERCOLOR> <GAMENUMBER> - joins game as player\n");
+            sb.append("\tview <GAMENUMBER> - joins game as spectator\n");
+            sb.append("\tlist - lists all available games\n");
+        }
+
         sb.append("\tquit / exit - exits game\n");
         sb.append("\tlogin <USERNAME> <PASSWORD> - logs into account\n");
         sb.append("\tregister <USERNAME> <PASSWORD> <EMAIL> - creates new account\n");
-        sb.append("\tlogout - logs player out\n");
-        sb.append("\tcreate <GAME NAME> - creates a new chess game\n");
-        sb.append("\tlist - lists all available games\n");
-        sb.append("\tjoin <PLAYERCOLOR> <GAMENUMBER> - joins game as player\n");
-        sb.append("\tview <GAMENUMBER> - joins game as spectator\n");
 
         System.out.println(sb.toString());
         System.out.print(RESET_TEXT_COLOR);
-        //add postlogin later
+        //TODO add postlogin later
 
     }
 

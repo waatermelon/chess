@@ -1,8 +1,12 @@
 package ui;
 
 
+import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import websocket.commands.CommandExtension;
+import websocket.commands.UserGameCommand;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,13 +21,45 @@ public class ServerFacade {
 
     String url;
     String authToken;
+    String port;
+
+    WebSocketClient WSClient;
 
     public ServerFacade(String port) {
+        this.port = port;
         url = "http://localhost:" + port;
     }
 
     public void WebSocketConnection() {
+        try {
+            WSClient = new WebSocketClient(port);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 
+    public void sendMessage(UserGameCommand.CommandType commandType, int gameID) {
+        CommandExtension command = new CommandExtension(
+                commandType,
+                authToken,
+                gameID,
+                null,
+                null
+        );
+        WSClient.sendMessage(serializer.toJson(command));
+    }
+
+    public void sendMessage(UserGameCommand.CommandType commandType, int gameID,
+                            ChessGame.TeamColor color, ChessMove move) {
+        CommandExtension command = new CommandExtension(
+                commandType,
+                authToken,
+                gameID,
+                color,
+                move
+        );
+        System.out.println(serializer.toJson(command));
+        WSClient.sendMessage(serializer.toJson(command));
     }
 
     public boolean register(String username, String password, String email) {
@@ -80,6 +116,7 @@ public class ServerFacade {
                 new String[] {"playerColor", "gameID"},
                 new String[] {playerColor, Integer.toString((int) gameID)});
         Map response = createRequest("PUT", "/game", jsonBody);
+
         return !response.containsKey("Exception");
     }
 
@@ -89,6 +126,7 @@ public class ServerFacade {
                 new String[] {"SPECTATOR", Integer.toString((int) gameID)});
 
         Map response = createRequest("PUT", "/game", jsonBody);
+
         return !response.containsKey("Exception");
     }
 
