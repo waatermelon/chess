@@ -16,6 +16,16 @@ public class ChessGame {
     private ChessBoard board = new ChessBoard();
     private TeamColor turn = TeamColor.WHITE;
 
+    private boolean gameFinished;
+
+    public void setGameFinished(boolean gameFinished) {
+        this.gameFinished = gameFinished;
+    }
+
+    public boolean getGameFinished() {
+        return gameFinished;
+    }
+
     public ChessGame() {
         board.resetBoard();
     }

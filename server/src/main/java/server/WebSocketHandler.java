@@ -98,8 +98,29 @@ public class WebSocketHandler {
 
     private void leave(Session session, CommandExtension data) {
         AuthData authData;
+        GameData game;
         try {
             authData = Server.authDAO.getAuth(data.getAuthToken());
+            game = Server.gameDAO.getGame(data.getGameID());
+            String username = authData.username();
+            if (Objects.equals(game.whiteUsername(), username)) {
+                GameData newGame = new GameData(
+                        game.gameID(), null, game.blackUsername(),
+                        game.gameName(), game.game()
+                );
+
+                Server.gameDAO.updateGame(newGame);
+            } else if (Objects.equals(game.blackUsername(), username)) {
+                GameData newGame = new GameData(
+                        game.gameID(), game.whiteUsername(), null,
+                        game.gameName(), game.game()
+                );
+
+                Server.gameDAO.updateGame(newGame);
+            }
+
+
+
         } catch (Exception e) {
             clientError(session);
             return;
@@ -125,8 +146,16 @@ public class WebSocketHandler {
         try {
             authData = Server.authDAO.getAuth(data.getAuthToken());
             game = Server.gameDAO.getGame(data.getGameID());
+            String username = authData.username();
 
-
+            if (game.game().getGameFinished()) {
+                throw new RuntimeException();
+            }
+            if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
+                throw new RuntimeException();
+            }
+            game.game().setGameFinished(true);
+            Server.gameDAO.updateGame(game);
         } catch (Exception e) {
             clientError(session);
             return;
@@ -156,19 +185,22 @@ public class WebSocketHandler {
             color = data.getTeamColor();
             System.out.println(data);
             String username = authData.username();
-                if (game.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
-                    if (!Objects.equals(game.whiteUsername(), username)) {
-                        System.out.println("white user does not match");
-                        throw new RuntimeException();
-                    }
-                    System.out.println("white user did match");
-                } else {
-                    if (!Objects.equals(game.blackUsername(), username)) {
-                        System.out.println("black user does not match");
-                        throw new RuntimeException();
-                    }
-                    System.out.println("black user did match");
+            if (game.game().getGameFinished()) {
+                throw new RuntimeException();
+            }
+            if (game.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
+                if (!Objects.equals(game.whiteUsername(), username)) {
+                    System.out.println("white user does not match");
+                    throw new RuntimeException();
                 }
+                System.out.println("white user did match");
+            } else {
+                if (!Objects.equals(game.blackUsername(), username)) {
+                    System.out.println("black user does not match");
+                    throw new RuntimeException();
+                }
+                System.out.println("black user did match");
+            }
 
 
             game.game().makeMove(data.getChessMove());
