@@ -147,10 +147,8 @@ public class ChessLoop {
         facade.WebSocketConnection();
         int gameID = (int) currentGame.gameID();
         if (viewing) {
-            System.out.println("joining as viewer");
-            facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID);
+            facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID, username, null, null);
         } else {
-            System.out.println("joiing as player");
             facade.sendMessage(
                     UserGameCommand.CommandType.CONNECT, gameID, username, currentColor, null
             );
@@ -172,15 +170,21 @@ public class ChessLoop {
                     boardPrinter.printBoard(currentGame, currentColor);
                     break;
                 case "leave":
-                    //TODO implement through server facade
                     runLeave(args);
+                    gameRunning = false;
                     break;
                 case "move":
-                    //only allowed if not viewing
+                    if (viewing) {
+                        break;
+                    }
+
                     //TODO implement through server facade
                     break;
                 case "resign":
-                    //only allowed if not viewing
+                    if (viewing) {
+                        break;
+                    }
+
                     //TODO implement through server facade
                     break;
                 case "highlight":
@@ -250,9 +254,10 @@ public class ChessLoop {
     }
 
     private void runLeave(String[] args) {
-        //TODO disconnect websocket
-        //TODO leave game
-
+        facade.sendMessage(
+                UserGameCommand.CommandType.LEAVE, currentGame.gameID(), username, null, null
+        );
+        facade.closeConnection();
     }
 
     public void exit() {
@@ -316,8 +321,6 @@ public class ChessLoop {
 
         System.out.println(sb.toString());
         System.out.print(RESET_TEXT_COLOR);
-        //TODO add postlogin later
-
     }
 
     private boolean amLoggedIn() {

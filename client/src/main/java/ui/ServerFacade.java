@@ -38,6 +38,14 @@ public class ServerFacade {
         }
     }
 
+    public void closeConnection() {
+        try {
+            WSClient.closeSession();
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
     public void sendMessage(UserGameCommand.CommandType commandType, int gameID) {
         CommandExtension command = new CommandExtension(
                 commandType,
@@ -60,7 +68,7 @@ public class ServerFacade {
                 color,
                 move
         );
-        System.out.println(serializer.toJson(command));
+
         WSClient.sendMessage(serializer.toJson(command));
     }
 

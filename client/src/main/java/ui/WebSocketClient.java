@@ -1,5 +1,8 @@
 package ui;
 
+import com.google.gson.Gson;
+import websocket.messages.MessageExtension;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,6 +13,7 @@ import javax.websocket.*;
 @ClientEndpoint
 public class WebSocketClient extends Endpoint {
 
+    Gson serializer = new Gson();
     private Session session;
 
     public WebSocketClient(String port) {
@@ -26,7 +30,6 @@ public class WebSocketClient extends Endpoint {
     }
 
     public void onOpen(Session session, EndpointConfig config) {
-        System.out.println("opened session successfully!"); //TODO TESTING
         this.session = session;
         session.addMessageHandler(new MessageHandler.Whole<String>() {
             @Override
@@ -36,10 +39,16 @@ public class WebSocketClient extends Endpoint {
         });
     }
 
-    private void clientMessaged(String message) {
-        System.out.println("received message successfully!"); //TODO TESTING
-        System.out.println(message);
+    public void closeSession() throws IOException {
+        if (this.session != null) {
+            this.session.close();
+        }
+    }
 
+    private void clientMessaged(String message) {
+        MessageExtension data = serializer.fromJson(message, MessageExtension.class);
+
+        printMessage(data.getMessage());
         // TODO use GSON convert to java-class for interpretation
     }
 
@@ -53,5 +62,10 @@ public class WebSocketClient extends Endpoint {
         } else {
             System.out.println("unable to send message.");
         }
+    }
+
+    private void printMessage(String message) {
+        System.out.print("\n" + message + "\n[LOGGED_IN] >>> ");
+
     }
 }

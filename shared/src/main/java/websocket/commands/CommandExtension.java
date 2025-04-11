@@ -27,6 +27,10 @@ public class CommandExtension extends UserGameCommand{
         return move;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     @Override
     public String toString() {
         return "CommandExtension{" +

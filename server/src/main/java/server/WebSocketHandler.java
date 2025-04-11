@@ -40,9 +40,7 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketError
-    public void onError(Session session, Throwable error) {
-        Server.sessions.put(session, -1);
-    }
+    public void onError(Session session, Throwable error) {}
 
     // Business logic methods for future expansion
     private void playerJoin(Session session, CommandExtension data) {
@@ -55,7 +53,8 @@ public class WebSocketHandler {
             Server.sessions.put(session, data.getGameID());
             MessageExtension message = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
-                    "whut"
+                    data.getUsername() + " joined the game as " +
+                            data.getTeamColor().toString().toLowerCase() + "!"
             );
             try {
                 sendMessagetoGame(session, message);
@@ -68,7 +67,7 @@ public class WebSocketHandler {
             Server.sessions.put(session, data.getGameID());
             MessageExtension message = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
-                    "whut"
+                    data.getUsername() + " joined the game as a viewer!"
             );
             try {
                 sendMessagetoGame(session, message);
@@ -80,14 +79,51 @@ public class WebSocketHandler {
 
     private void leave(Session session, CommandExtension data) {
         //TODO Implementation for leave logic
+        MessageExtension message = new MessageExtension(
+                ServerMessage.ServerMessageType.NOTIFICATION,
+                data.getUsername() + " has left the game."
+        );
+        try {
+            sendMessagetoGame(session, message);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+        Server.sessions.put(session, -1);
     }
 
     private void resign(Session session, CommandExtension data) {
         //TODO Implementation for resign logic
+        Server.sessions.put(session, -1);
+        MessageExtension message = new MessageExtension(
+                ServerMessage.ServerMessageType.NOTIFICATION,
+                data.getUsername() + " has resigned."
+        );
+        try {
+            sendMessagetoGame(session, message);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 
     private void move(Session session, CommandExtension data) {
         //TODO Implementation for processing a move
+        Server.sessions.put(session, -1);
+
+        String startPos = String.valueOf(data.getChessMove().getStartPosition().getRow());
+        startPos += " " + String.valueOf(data.getChessMove().getStartPosition().getColumn());
+
+        String endPos = String.valueOf(data.getChessMove().getEndPosition().getRow());
+        endPos += " " + String.valueOf(data.getChessMove().getEndPosition().getColumn());
+
+        MessageExtension message = new MessageExtension(
+                ServerMessage.ServerMessageType.NOTIFICATION,
+                data.getUsername() + " moved " + startPos + " to " + endPos + "."
+        );
+        try {
+            sendMessagetoGame(session, message);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 
     private void sendMessage(Session session, ServerMessage message) throws IOException {
@@ -98,19 +134,15 @@ public class WebSocketHandler {
 
         for (Session serverSession : Server.sessions.keySet()) {
             if (Server.sessions.get(serverSession) == -1) {
-                System.out.println("exited on non session");
                 continue;
             }
             if (!Objects.equals(Server.sessions.get(serverSession), Server.sessions.get(session))) {
-                System.out.println("exited on not same gameID" + Server.sessions.get(serverSession) + " : " + Server.sessions.get(session));
                 continue;
             }
             if (serverSession == session) {
-                System.out.println("exited on being the sender");
                 continue;
             }
-            // end guard clause
-            System.out.println("sent message to a player!");
+
             sendMessage(serverSession, message);
         }
     }
