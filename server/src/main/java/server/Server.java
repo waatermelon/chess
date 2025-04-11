@@ -4,7 +4,10 @@ import dataaccess.*;
 import service.AuthService;
 import service.GameService;
 import service.UserService;
+import org.eclipse.jetty.websocket.api.Session;
 import spark.*;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
 
@@ -19,6 +22,8 @@ public class Server {
     AuthHandler authHandler = new AuthHandler(authService);
     GameHandler gameHandler = new GameHandler(gameService);
     UserHandler userHandler = new UserHandler(userService);
+
+    public static ConcurrentHashMap<Session, Integer> sessions = new ConcurrentHashMap<>();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);

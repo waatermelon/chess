@@ -44,17 +44,19 @@ public class ServerFacade {
                 authToken,
                 gameID,
                 null,
+                null,
                 null
         );
         WSClient.sendMessage(serializer.toJson(command));
     }
 
     public void sendMessage(UserGameCommand.CommandType commandType, int gameID,
-                            ChessGame.TeamColor color, ChessMove move) {
+                            String username, ChessGame.TeamColor color, ChessMove move) {
         CommandExtension command = new CommandExtension(
                 commandType,
                 authToken,
                 gameID,
+                username,
                 color,
                 move
         );

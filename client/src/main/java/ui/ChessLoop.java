@@ -21,6 +21,7 @@ public class ChessLoop {
     ServerFacade facade;
     GameData currentGame;
     ChessGame.TeamColor currentColor;
+    String username;
 
     ArrayList<GameData> games;
     BoardPrinter boardPrinter;
@@ -39,6 +40,7 @@ public class ChessLoop {
             String[] args = getInput();
             if (!gaurdClause(args)) {
                 System.out.println("Please Enter a Valid Command. Type \"help\" for Commands.");
+                continue;
             }
 
             switch (args[0]) {
@@ -57,6 +59,7 @@ public class ChessLoop {
                     }
                     if (facade.login(args[1], args[2])) {
                         System.out.println("Logged in Successfully! Have fun!");
+                        username = args[1];
                     } else {
                         System.out.println("Login Unsuccessful. Please Retry.");
                     }
@@ -69,6 +72,7 @@ public class ChessLoop {
                     }
                     if (facade.register(args[1], args[2], args[3])) {
                         System.out.println("Registered Successfully! Have fun!");
+                        username = args[1];
                     } else {
                         System.out.println("Register Unsuccessful. Please Retry.");
                     }
@@ -147,7 +151,9 @@ public class ChessLoop {
             facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID);
         } else {
             System.out.println("joiing as player");
-            facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID, currentColor, null);
+            facade.sendMessage(
+                    UserGameCommand.CommandType.CONNECT, gameID, username, currentColor, null
+            );
         }
 
         boolean gameRunning = true;

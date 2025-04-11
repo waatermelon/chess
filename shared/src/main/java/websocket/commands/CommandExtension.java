@@ -5,12 +5,16 @@ import chess.ChessMove;
 
 public class CommandExtension extends UserGameCommand{
 
+    String username;
     TeamColor color;
     ChessMove move;
 
-    public CommandExtension
-            (CommandType type, String authToken, int gameID, TeamColor color, ChessMove move) {
+    public CommandExtension(
+            CommandType type, String authToken, int gameID,
+            String username, TeamColor color, ChessMove move)
+    {
         super(type, authToken, gameID);
+        this.username = username;
         this.color = color;
         this.move = move;
     }
