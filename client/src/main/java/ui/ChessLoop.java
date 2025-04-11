@@ -2,7 +2,6 @@ package ui;
 
 import chess.*;
 import com.google.gson.internal.LinkedTreeMap;
-import model.AuthData;
 import model.GameData;
 import websocket.commands.UserGameCommand;
 
@@ -141,7 +140,7 @@ public class ChessLoop {
     }
 
     private void runGame(boolean viewing) {
-        facade.WebSocketConnection();
+        facade.webSocketConnection();
         int gameID = (int) currentGame.gameID();
         if (viewing) {
             facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID, username, null, null);

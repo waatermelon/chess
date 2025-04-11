@@ -23,7 +23,7 @@ public class ServerFacade {
     String authToken;
     String port;
     ChessLoop loop;
-    WebSocketClient WSClient;
+    WebSocketClient webSocketClient;
 
     public ServerFacade(String port, ChessLoop loop) {
         this.port = port;
@@ -36,9 +36,9 @@ public class ServerFacade {
         url = "http://localhost:" + port;
     }
 
-    public void WebSocketConnection() {
+    public void webSocketConnection() {
         try {
-            WSClient = new WebSocketClient(port, loop);
+            webSocketClient = new WebSocketClient(port, loop);
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -46,7 +46,7 @@ public class ServerFacade {
 
     public void closeConnection() {
         try {
-            WSClient.closeSession();
+            webSocketClient.closeSession();
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -61,7 +61,7 @@ public class ServerFacade {
                 null,
                 null
         );
-        WSClient.sendMessage(serializer.toJson(command));
+        webSocketClient.sendMessage(serializer.toJson(command));
     }
 
     public void sendMessage(UserGameCommand.CommandType commandType, int gameID,
@@ -75,7 +75,7 @@ public class ServerFacade {
                 move
         );
 
-        WSClient.sendMessage(serializer.toJson(command));
+        webSocketClient.sendMessage(serializer.toJson(command));
     }
 
     public boolean register(String username, String password, String email) {
