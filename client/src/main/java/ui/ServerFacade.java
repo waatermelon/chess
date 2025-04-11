@@ -22,6 +22,10 @@ public class ServerFacade {
         url = "http://localhost:" + port;
     }
 
+    public void WebSocketConnection() {
+
+    }
+
     public boolean register(String username, String password, String email) {
         String jsonBody = convertArgsToJson(
                 new String[] {"username", "password", "email"},

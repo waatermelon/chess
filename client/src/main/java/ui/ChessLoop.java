@@ -182,6 +182,7 @@ public class ChessLoop {
             double gameNumber = Double.parseDouble(args[1]);
             if (facade.viewGame(gameNumber)) {
                 System.out.println("Successfully viewing game!");
+                //TODO implement runGame
                 GameData game = games.get(((int) gameNumber) - 1);
                 boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);
             } else {
@@ -205,7 +206,7 @@ public class ChessLoop {
 
             if (facade.joinGame(teamColor, gameNum)) {
                 System.out.println("Successfully joined game!");
-
+                //TODO implement runGame
                 boardPrinter.printBoard(games.get((int) gameNum - 1),
                         (teamColor.equals("WHITE")) ?
                                 ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
