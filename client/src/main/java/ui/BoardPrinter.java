@@ -6,6 +6,7 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static ui.EscapeSequences.*;
@@ -36,56 +37,7 @@ public class BoardPrinter {
     }
 
     private void setBoardSlots(GameData gameData, String[][] board, ChessGame.TeamColor teamColor) {
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                boolean notPrinted = true;
-                if (i == 0 || i == board.length - 1 || j == 0 || j == board[i].length - 1) {
-                    board[i][j] = SET_BG_COLOR_MAGENTA;
-                } else {
-                    boolean isEven = (i + j) % 2 == 0;
-                    board[i][j] = isEven ? SET_BG_COLOR_WHITE : SET_BG_COLOR_LIGHT_GREY;
-                }
-
-                if ((i == 0 || i == board.length - 1) && (j > 0 && j < board[i].length - 1)) {
-                    char columnLabel;
-                    if (teamColor == ChessGame.TeamColor.WHITE) {
-                        columnLabel = (char) ('a' + j - 1);
-                    } else {
-                        columnLabel = (char) ('h' - (j - 1));
-                    }
-                    board[i][j] += SET_TEXT_COLOR_BLACK + "\u2003" + columnLabel + " ";
-                    notPrinted = false;
-                }
-
-                if ((j == 0 || j == board[i].length - 1) && (i > 0 && i < board.length - 1)) {
-                    int rowNumber = (teamColor == ChessGame.TeamColor.WHITE) ? (9 - i) : i;
-                    char rowLabel = (char) ('0' + rowNumber);
-                    board[i][j] += SET_TEXT_COLOR_BLACK + "\u2003" + rowLabel + "\u2003";
-                    notPrinted = false;
-                }
-
-                if (i > 0 && i < board.length - 1 && j > 0 && j < board[i].length - 1) {
-                    int chessRow, chessCol;
-                    if (teamColor == ChessGame.TeamColor.WHITE) {
-                        chessRow = 9 - i;
-                        chessCol = j;
-                    } else {
-                        chessRow = i;
-                        chessCol = 9 - j;
-                    }
-                    ChessPosition position = new ChessPosition(chessRow, chessCol);
-                    ChessPiece piece = gameData.game().getBoard().getPiece(position);
-
-                    if (piece != null) {
-                        board[i][j] += getPiecePrint(piece);
-                    } else {
-                        board[i][j] += "\u2003  ";
-                    }
-                } else if(notPrinted) {
-                    board[i][j] += "\u2003 \u2003";
-                }
-            }
-        }
+        setBoardSlotsHighlighted(gameData, board, teamColor, new ArrayList<ChessMove>());
     }
 
     public void printBoard(GameData gameData, ChessGame.TeamColor teamColor) {

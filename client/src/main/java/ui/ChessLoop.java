@@ -118,7 +118,8 @@ public class ChessLoop {
                                 String blackUser = (String) listedGame.get("blackUsername");
                                 String gameName = (String) listedGame.get("gameName");
                                 ChessGame game = convertDataToGame(listedGame.get("game"));
-                                GameData gameData = new GameData(newGameID, blackUser, whiteUser, gameName, game);
+                                GameData gameData = new GameData(newGameID, blackUser, whiteUser,
+                                        gameName, game);
                                 games.add(gameData);
                             }
                         }
@@ -143,7 +144,8 @@ public class ChessLoop {
         facade.webSocketConnection();
         int gameID = (int) currentGame.gameID();
         if (viewing) {
-            facade.sendMessage(UserGameCommand.CommandType.CONNECT, gameID, username, null, null);
+            facade.sendMessage(UserGameCommand.CommandType.CONNECT,
+                    gameID, username, null, null);
         } else {
             facade.sendMessage(
                     UserGameCommand.CommandType.CONNECT, gameID, username, currentColor, null
@@ -415,7 +417,8 @@ public class ChessLoop {
 
     private void runResign(String[] args) {
         facade.sendMessage(
-                UserGameCommand.CommandType.RESIGN, currentGame.gameID(), username, currentColor, null
+                UserGameCommand.CommandType.RESIGN, currentGame.gameID(),
+                username, currentColor, null
         );
     }
 
@@ -440,27 +443,7 @@ public class ChessLoop {
         if (String.valueOf(treeMap.get("pieceColor")).equals("WHITE")) {
             teamColor = ChessGame.TeamColor.WHITE;
         }
-        ChessPiece.PieceType type = ChessPiece.PieceType.PAWN;
-        switch(String.valueOf(treeMap.get("type"))) {
-            case "ROOK":
-                type = ChessPiece.PieceType.ROOK;
-                break;
-            case "KNIGHT":
-                type = ChessPiece.PieceType.KNIGHT;
-                break;
-            case "BISHOP":
-                type = ChessPiece.PieceType.BISHOP;
-                break;
-            case "QUEEN":
-                type = ChessPiece.PieceType.QUEEN;
-                break;
-            case "KING":
-                type = ChessPiece.PieceType.KING;
-                break;
-            case "PAWN":
-                type = ChessPiece.PieceType.PAWN;
-                break;
-        }
+        ChessPiece.PieceType type = convertStringToPiece(String.valueOf(treeMap.get("type")));
         return new ChessPiece(teamColor, type);
     }
 
