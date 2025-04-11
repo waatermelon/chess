@@ -49,6 +49,15 @@ public class AuthService {
         authDAO.deleteAuth(auth);
     }
 
+    public boolean validAuth(String authToken) {
+        try {
+            authDAO.getAuth(authToken);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     public void clear() {
         userDAO.clear();
         authDAO.clear();

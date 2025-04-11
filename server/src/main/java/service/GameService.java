@@ -84,6 +84,7 @@ public class GameService {
 
     }
 
+
     public void clear() {
         this.authDAO.clear();
         this.gameDAO.clear();

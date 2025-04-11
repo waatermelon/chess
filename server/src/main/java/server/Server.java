@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
 
-    AuthDAO authDAO = new SQLAuthDAO();
-    GameDAO gameDAO = new SQLGameDAO();
-    UserDAO userDAO = new SQLUserDAO();
+    public static AuthDAO authDAO = new SQLAuthDAO();
+    public static GameDAO gameDAO = new SQLGameDAO();
+    public static UserDAO userDAO = new SQLUserDAO();
 
     AuthService authService = new AuthService(authDAO, userDAO);
     GameService gameService = new GameService(authDAO, gameDAO);

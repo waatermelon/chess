@@ -1,6 +1,9 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import model.AuthData;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import websocket.commands.CommandExtension;
@@ -44,11 +47,20 @@ public class WebSocketHandler {
 
     // Business logic methods for future expansion
     private void playerJoin(Session session, CommandExtension data) {
-        //TODO Implementation for player joining logic
-        //TODO if player not null then joining as player
-        System.out.println(data);
+        AuthData authData;
+        GameData game;
+        try {
+            authData = Server.authDAO.getAuth(data.getAuthToken());
+            game = Server.gameDAO.getGame(data.getGameID());
+        } catch (Exception e) {
+            clientError(session);
+            return;
+        }
+
+
         if (data.getTeamColor() != null) {
             // player
+
             System.out.println("player joined game as player");
             Server.sessions.put(session, data.getGameID());
             MessageExtension message = new MessageExtension(
@@ -63,7 +75,7 @@ public class WebSocketHandler {
             }
         } else {
             // viewer
-            System.out.println("player joined game as VIEWER!");
+            System.out.println("player joined game as viewer!");
             Server.sessions.put(session, data.getGameID());
             MessageExtension message = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
@@ -78,7 +90,14 @@ public class WebSocketHandler {
     }
 
     private void leave(Session session, CommandExtension data) {
-        //TODO Implementation for leave logic
+        AuthData authData;
+        try {
+            authData = Server.authDAO.getAuth(data.getAuthToken());
+        } catch (Exception e) {
+            clientError(session);
+            return;
+        }
+
         MessageExtension message = new MessageExtension(
                 ServerMessage.ServerMessageType.NOTIFICATION,
                 data.getUsername() + " has left the game."
@@ -93,6 +112,21 @@ public class WebSocketHandler {
 
     private void resign(Session session, CommandExtension data) {
         //TODO Implementation for resign logic
+        AuthData authData;
+        GameData game;
+        ChessGame.TeamColor color;
+        try {
+            authData = Server.authDAO.getAuth(data.getAuthToken());
+            game = Server.gameDAO.getGame(data.getGameID());
+            color = data.getTeamColor();
+            if (color == null) {
+                throw new RuntimeException();
+            }
+        } catch (Exception e) {
+            clientError(session);
+            return;
+        }
+
         Server.sessions.put(session, -1);
         MessageExtension message = new MessageExtension(
                 ServerMessage.ServerMessageType.NOTIFICATION,
@@ -144,6 +178,17 @@ public class WebSocketHandler {
             }
 
             sendMessage(serverSession, message);
+        }
+    }
+
+    private void clientError(Session session){
+        MessageExtension message = new MessageExtension(
+                ServerMessage.ServerMessageType.ERROR, null, "Error"
+        );
+        try {
+            sendMessage(session, message);
+        } catch ( Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 }

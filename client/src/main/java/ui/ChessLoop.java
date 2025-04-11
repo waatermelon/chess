@@ -204,7 +204,7 @@ public class ChessLoop {
                 return;
             }
             double gameNumber = Double.parseDouble(args[1]);
-            if (facade.viewGame(gameNumber) && games.size() > (int) gameNumber - 1) {
+            if (games.size() > (int) gameNumber - 1 && facade.viewGame(gameNumber)) {
                 System.out.println("Successfully viewing game!");
                 //TODO implement runGame
                 GameData game = games.get(((int) gameNumber) - 1);
@@ -233,7 +233,7 @@ public class ChessLoop {
             String teamColor = args[1].toUpperCase();
             double gameNum = Double.parseDouble(args[2]);
 
-            if (facade.joinGame(teamColor, gameNum) && games.size() > (int) gameNum - 1) {
+            if (games.size() > (int) gameNum - 1 && facade.joinGame(teamColor, gameNum)) {
                 System.out.println("Successfully joined game!");
                 //TODO implement runGame
                 currentGame = games.get((int) gameNum - 1);
@@ -258,6 +258,7 @@ public class ChessLoop {
                 UserGameCommand.CommandType.LEAVE, currentGame.gameID(), username, null, null
         );
         facade.closeConnection();
+        System.out.println("You have left the game.");
     }
 
     public void exit() {
