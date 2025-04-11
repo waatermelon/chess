@@ -81,51 +81,10 @@ public class ChessLoop {
                     }
                     break;
                 case "list":
-                    if (amLoggedIn()) {
-                        ArrayList<LinkedTreeMap> listedGames = facade.listGames();
-                        printGames(listedGames);
-                        games.clear();
-                        for (LinkedTreeMap listedGame : listedGames) {
-                            int gameID = (int)(double) listedGame.get("gameID");
-                            String whiteUser = (String) listedGame.get("whiteUsername");
-                            String blackUser = (String) listedGame.get("blackUsername");
-                            String gameName = (String) listedGame.get("gameName");
-                            ChessGame game = convertDataToGame(listedGame.get("game"));
-                            GameData gameData = new GameData(gameID, blackUser, whiteUser, gameName, game);
-                            games.add(gameData);
-                        }
-                    } else {
-                        System.out.println("Log in to use this command.");
-                    }
+                    runListGames();
                     break;
                 case "create":
-                    if (amLoggedIn()) {
-                        if(args.length < 2) {
-                            System.out.println("Illegible Create Command. Type \"help\" for a Guide.");
-                            continue;
-                        }
-                        double gameID = facade.createGame(args[1]);
-                        if (gameID == 0) {
-                            System.out.println("Unable to create game. Try again.");
-                        } else {
-                            System.out.println("Created game successfully!");
-
-                            ArrayList<LinkedTreeMap> listedGames = facade.listGames();
-                            games.clear();
-                            for (LinkedTreeMap listedGame : listedGames) {
-                                int newGameID = (int)(double) listedGame.get("gameID");
-                                String whiteUser = (String) listedGame.get("whiteUsername");
-                                String blackUser = (String) listedGame.get("blackUsername");
-                                String gameName = (String) listedGame.get("gameName");
-                                ChessGame game = convertDataToGame(listedGame.get("game"));
-                                GameData gameData = new GameData(newGameID, blackUser, whiteUser,
-                                        gameName, game);
-                                games.add(gameData);
-                            }
-                        }
-                    } else {
-                        System.out.println("Log in to use this command.");
-                    }
+                    runCreate(args);
                     break;
                 case "join":
                     runJoin(args);
@@ -137,6 +96,50 @@ public class ChessLoop {
                     System.out.println("Command not found. Type \"help\" for a list of Valid Commands.");
                     break;
             }
+        }
+    }
+
+    private void runCreate(String[] args) {
+        if (amLoggedIn()) {
+            if(args.length < 2) {
+                System.out.println("Illegible Create Command. Type \"help\" for a Guide.");
+                return;
+            }
+            double gameID = facade.createGame(args[1]);
+            if (gameID == 0) {
+                System.out.println("Unable to create game. Try again.");
+            } else {
+                System.out.println("Created game successfully!");
+                ArrayList<LinkedTreeMap> listedGames = facade.listGames();
+                games.clear();
+                getListedGames(listedGames);
+            }
+        } else {
+            System.out.println("Log in to use this command.");
+        }
+    }
+
+    private void runListGames() {
+        if (amLoggedIn()) {
+            ArrayList<LinkedTreeMap> listedGames = facade.listGames();
+            printGames(listedGames);
+            games.clear();
+            getListedGames(listedGames);
+        } else {
+            System.out.println("Log in to use this command.");
+        }
+    }
+
+    private void getListedGames(ArrayList<LinkedTreeMap> listedGames) {
+        for (LinkedTreeMap listedGame : listedGames) {
+            int newGameID = (int)(double) listedGame.get("gameID");
+            String whiteUser = (String) listedGame.get("whiteUsername");
+            String blackUser = (String) listedGame.get("blackUsername");
+            String gameName = (String) listedGame.get("gameName");
+            ChessGame game = convertDataToGame(listedGame.get("game"));
+            GameData gameData = new GameData(newGameID, blackUser, whiteUser,
+                    gameName, game);
+            games.add(gameData);
         }
     }
 
