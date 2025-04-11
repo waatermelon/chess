@@ -109,7 +109,7 @@ public class ChessLoop {
                         if (gameID == 0) {
                             System.out.println("Unable to create game. Try again.");
                         } else {
-                            System.out.println("Created game sucessfuly!");
+                            System.out.println("Created game successfully!");
 
                             ArrayList<LinkedTreeMap> listedGames = facade.listGames();
                             games.clear();
@@ -205,7 +205,6 @@ public class ChessLoop {
                 GameData game = games.get(((int) gameNumber) - 1);
                 currentGame = games.get((int) gameNumber - 1);
                 currentColor = ChessGame.TeamColor.WHITE;
-                boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);//TODO send to websocketclient
                 runGame(true);
             } else {
                 currentColor = ChessGame.TeamColor.WHITE;
@@ -234,9 +233,7 @@ public class ChessLoop {
                 currentGame = games.get((int) gameNum - 1);
                 currentColor = (teamColor.equals("WHITE") ?
                         ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
-                boardPrinter.printBoard(games.get((int) gameNum - 1),//TODO send to websocketclient
-                        (teamColor.equals("WHITE")) ?
-                                ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+
                 runGame(false);
             } else {
                 currentGame = null;
@@ -418,15 +415,12 @@ public class ChessLoop {
     }
 
     private void runResign(String[] args) {
-        // TODO
         facade.sendMessage(
                 UserGameCommand.CommandType.RESIGN, currentGame.gameID(), username, currentColor, null
         );
     }
 
     private void runHighlight(String[] args) {
-        // TODO
-        // do later
         if (args.length < 2) {
             System.out.println("Invalid Highlight: Please try again.");
         }

@@ -43,7 +43,6 @@ public class WebSocketHandler {
     @OnWebSocketError
     public void onError(Session session, Throwable error) {}
 
-    // Business logic methods for future expansion
     private void playerJoin(Session session, CommandExtension data) {
         AuthData authData;
         GameData game;
@@ -56,9 +55,6 @@ public class WebSocketHandler {
         }
 
         if (data.getTeamColor() != null) {
-            // player
-
-            System.out.println("player joined game as player");
             Server.sessions.put(session, data.getGameID());
             MessageExtension message = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
@@ -72,8 +68,6 @@ public class WebSocketHandler {
                 System.out.println(e.getMessage());
             }
         } else {
-            // viewer
-            System.out.println("player joined game as viewer!");
             Server.sessions.put(session, data.getGameID());
             MessageExtension message = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
@@ -140,7 +134,6 @@ public class WebSocketHandler {
     }
 
     private void resign(Session session, CommandExtension data) {
-        //TODO Implementation for resign logic
         AuthData authData;
         GameData game;
         ChessGame.TeamColor color;
@@ -175,16 +168,12 @@ public class WebSocketHandler {
     }
 
     private void move(Session session, CommandExtension data) {
-        //TODO Implementation for processing a move
         AuthData authData;
         GameData game;
-        ChessGame.TeamColor color;
 
         try {
             authData = Server.authDAO.getAuth(data.getAuthToken());
             game = Server.gameDAO.getGame(data.getGameID());
-            color = data.getTeamColor();
-            System.out.println(data);
             String username = authData.username();
             if (game.game().getGameFinished()) {
                 throw new RuntimeException();
@@ -226,7 +215,6 @@ public class WebSocketHandler {
         );
 
         try {
-            System.out.println("BEFORE SENDS");
             sendMessagetoGame(session, loadGameMessage, true);
             sendMessagetoGame(session, message, false);
 
@@ -249,7 +237,6 @@ public class WebSocketHandler {
             throws IOException {
 
         for (Session serverSession : Server.sessions.keySet()) {
-            System.out.println("server session: " + Server.sessions.get(serverSession) + " : " + Server.sessions.get(session));
             if (Server.sessions.get(serverSession) == -1) {
                 continue;
             }
