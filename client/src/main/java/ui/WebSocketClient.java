@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import websocket.messages.MessageExtension;
 
@@ -15,14 +16,16 @@ public class WebSocketClient extends Endpoint {
 
     Gson serializer = new Gson();
     private Session session;
+    private ChessLoop loop;
 
-    public WebSocketClient(String port) {
+    public WebSocketClient(String port, ChessLoop loop) {
         try {
             URI uri = new URI("ws://localhost:" + port + "/ws");
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, uri);
 
+            this.loop = loop;
 
         } catch (URISyntaxException | DeploymentException | IOException e) {
             throw new RuntimeException(e);
@@ -47,9 +50,23 @@ public class WebSocketClient extends Endpoint {
 
     private void clientMessaged(String message) {
         MessageExtension data = serializer.fromJson(message, MessageExtension.class);
+        switch(data.getServerMessageType()) {
+            case LOAD_GAME -> printLoad(data);
+            case NOTIFICATION -> printMessage(data.getMessage());
+            case ERROR -> printError(data.getErrorMessage());
+        }
+    }
 
-        printMessage(data.getMessage());
-        // TODO use GSON convert to java-class for interpretation
+    private void printLoad(MessageExtension data) {
+        loop.currentGame = data.getGameData();
+        BoardPrinter boardPrinter = new BoardPrinter();
+        System.out.println();
+        boardPrinter.printBoard(loop.currentGame, loop.currentColor);
+        System.out.println("[LOGGED IN] >>> ");
+    }
+
+    private void printError(String errorMessage) {
+        System.out.print("\nThere was an Error. Please continue.\n[LOGGED_IN] >>> ");
     }
 
     public void sendMessage(String message) {

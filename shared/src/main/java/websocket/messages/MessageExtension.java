@@ -32,4 +32,8 @@ public class MessageExtension extends ServerMessage{
     public String getErrorMessage() {
         return errorMessage;
     }
+
+    public GameData getGameData() {
+        return game;
+    }
 }

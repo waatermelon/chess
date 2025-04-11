@@ -1,9 +1,6 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import com.google.gson.internal.LinkedTreeMap;
 import model.AuthData;
 import model.GameData;
@@ -19,15 +16,15 @@ public class ChessLoop {
     Scanner scanner;
     volatile boolean running;
     ServerFacade facade;
-    GameData currentGame;
-    ChessGame.TeamColor currentColor;
+    public GameData currentGame;
+    public ChessGame.TeamColor currentColor;
     String username;
 
     ArrayList<GameData> games;
     BoardPrinter boardPrinter;
 
     public ChessLoop(int port, boolean debug) {
-        facade = new ServerFacade(Integer.toString(port));
+        facade = new ServerFacade(Integer.toString(port), this);
         this.games = new ArrayList<GameData>();
         this.boardPrinter = new BoardPrinter();
     }
@@ -177,18 +174,16 @@ public class ChessLoop {
                     if (viewing) {
                         break;
                     }
-
-                    //TODO implement through server facade
+                    runMove(args);
                     break;
                 case "resign":
                     if (viewing) {
                         break;
                     }
-
-                    //TODO implement through server facade
+                    runResign(args);
                     break;
                 case "highlight":
-                    //TODO implement through board-printer
+                    runHighlight(args);
                     break;
                 default:
                     System.out.println("Please Enter a Valid Command. Type \"help\" for Commands.");
@@ -206,11 +201,11 @@ public class ChessLoop {
             double gameNumber = Double.parseDouble(args[1]);
             if (games.size() > (int) gameNumber - 1 && facade.viewGame(gameNumber)) {
                 System.out.println("Successfully viewing game!");
-                //TODO implement runGame
+
                 GameData game = games.get(((int) gameNumber) - 1);
                 currentGame = games.get((int) gameNumber - 1);
                 currentColor = ChessGame.TeamColor.WHITE;
-                boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);
+                boardPrinter.printBoard(game, ChessGame.TeamColor.WHITE);//TODO send to websocketclient
                 runGame(true);
             } else {
                 currentColor = ChessGame.TeamColor.WHITE;
@@ -235,11 +230,11 @@ public class ChessLoop {
 
             if (games.size() > (int) gameNum - 1 && facade.joinGame(teamColor, gameNum)) {
                 System.out.println("Successfully joined game!");
-                //TODO implement runGame
+
                 currentGame = games.get((int) gameNum - 1);
                 currentColor = (teamColor.equals("WHITE") ?
                         ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
-                boardPrinter.printBoard(games.get((int) gameNum - 1),
+                boardPrinter.printBoard(games.get((int) gameNum - 1),//TODO send to websocketclient
                         (teamColor.equals("WHITE")) ?
                                 ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
                 runGame(false);
@@ -291,7 +286,8 @@ public class ChessLoop {
         sb.append("\thelp - shows all available commands\n");
 
         if (!viewing) {
-            sb.append("\tmove <FROM POS> <TO POS> - Moves a piece on the board (example pos: a1)\n");
+            sb.append("\tmove <FROM POS> <TO POS> <PROMOTE TO> "+
+                    "- Moves a piece on the board (example pos: a1)\n");
             sb.append("\tresign - resigns the game\n");
         }
 
@@ -369,6 +365,80 @@ public class ChessLoop {
         return game;
     }
 
+    private ChessPosition getPosition(String pos) {
+        if (pos.length() != 2) {
+            System.out.println("Invalid position format: " + pos);
+            return null;
+        }
+        char fileChar = pos.charAt(0);
+        char rankChar = pos.charAt(1);
+
+        if (fileChar < 'a' || fileChar > 'h') {
+            System.out.println("Invalid file (column) in position: " + pos);
+            return null;
+        }
+
+        if (rankChar < '1' || rankChar > '8') {
+            System.out.println("Invalid rank (row) in position: " + pos);
+            return null;
+        }
+        int col = fileChar - 'a' + 1;
+        int row = rankChar - '1' + 1;
+
+        return new ChessPosition(row, col);
+    }
+
+    private void runMove(String[] args) {
+        if (args.length < 3) {
+            System.out.println("Invalid move command. Usage: move <FROM POS> <TO POS> <PROMOTE TO>");
+            return;
+        }
+
+        ChessPosition startPos = getPosition(args[1]);
+        ChessPosition endPos = getPosition(args[2]);
+        if (startPos == null || endPos == null) {
+            System.out.println("Invalid Move: Could not parse board positions.");
+            return;
+        }
+
+        ChessPiece.PieceType promoteTo = null;
+        if (args.length >= 4) {
+            promoteTo = convertStringToPiece(args[3].toUpperCase());
+        }
+
+        ChessMove move = new ChessMove(startPos, endPos, promoteTo);
+
+        facade.sendMessage(
+                UserGameCommand.CommandType.MAKE_MOVE,
+                currentGame.gameID(),
+                username,
+                currentColor,
+                move
+        );
+    }
+
+    private void runResign(String[] args) {
+        // TODO
+        facade.sendMessage(
+                UserGameCommand.CommandType.RESIGN, currentGame.gameID(), username, currentColor, null
+        );
+    }
+
+    private void runHighlight(String[] args) {
+        // TODO
+        // do later
+        if (args.length < 2) {
+            System.out.println("Invalid Highlight: Please try again.");
+        }
+        ChessPosition pos = getPosition(args[1]);
+        if (pos == null) {
+            System.out.println("Invalid Highlight Position: Could not parse board positions.");
+            return;
+        }
+
+        boardPrinter.printHighlightedBoard(currentGame, currentColor, pos);
+    }
+
     private ChessPiece convertDataToPiece(LinkedTreeMap treeMap) {
         ChessGame.TeamColor teamColor = ChessGame.TeamColor.BLACK;
         if (treeMap == null) {
@@ -399,5 +469,33 @@ public class ChessLoop {
                 break;
         }
         return new ChessPiece(teamColor, type);
+    }
+
+    private ChessPiece.PieceType convertStringToPiece(String piece) {
+        ChessPiece.PieceType type;
+        switch(piece) {
+            case "ROOK":
+                type = ChessPiece.PieceType.ROOK;
+                break;
+            case "KNIGHT":
+                type = ChessPiece.PieceType.KNIGHT;
+                break;
+            case "BISHOP":
+                type = ChessPiece.PieceType.BISHOP;
+                break;
+            case "QUEEN":
+                type = ChessPiece.PieceType.QUEEN;
+                break;
+            case "KING":
+                type = ChessPiece.PieceType.KING;
+                break;
+            case "PAWN":
+                type = ChessPiece.PieceType.PAWN;
+                break;
+            default:
+                type = null;
+                break;
+        }
+        return  type;
     }
 }

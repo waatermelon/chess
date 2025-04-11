@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -210,11 +211,10 @@ public class WebSocketHandler {
             return;
         }
 
-        String startPos = String.valueOf(data.getChessMove().getStartPosition().getRow());
-        startPos += " " + String.valueOf(data.getChessMove().getStartPosition().getColumn());
-
-        String endPos = String.valueOf(data.getChessMove().getEndPosition().getRow());
-        endPos += " " + String.valueOf(data.getChessMove().getEndPosition().getColumn());
+        ChessPosition startPosition = data.getChessMove().getStartPosition();
+        ChessPosition endPosition = data.getChessMove().getEndPosition();
+        String startPos = posToChessPos(startPosition);
+        String endPos = posToChessPos(endPosition);
 
         MessageExtension loadGameMessage = new MessageExtension(
                 ServerMessage.ServerMessageType.LOAD_GAME,
@@ -233,6 +233,12 @@ public class WebSocketHandler {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private String posToChessPos(ChessPosition pos) {
+        char file = (char) ('a' + pos.getColumn() - 1);
+        String rank = String.valueOf(pos.getRow());
+        return file + rank;
     }
 
     private void sendMessage(Session session, ServerMessage message) throws IOException {

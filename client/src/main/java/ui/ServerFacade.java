@@ -22,8 +22,14 @@ public class ServerFacade {
     String url;
     String authToken;
     String port;
-
+    ChessLoop loop;
     WebSocketClient WSClient;
+
+    public ServerFacade(String port, ChessLoop loop) {
+        this.port = port;
+        this.loop = loop;
+        url = "http://localhost:" + port;
+    }
 
     public ServerFacade(String port) {
         this.port = port;
@@ -32,7 +38,7 @@ public class ServerFacade {
 
     public void WebSocketConnection() {
         try {
-            WSClient = new WebSocketClient(port);
+            WSClient = new WebSocketClient(port, loop);
         } catch (Exception e) {
             System.out.println(e);
         }
