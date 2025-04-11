@@ -125,22 +125,20 @@ public class WebSocketHandler {
         try {
             authData = Server.authDAO.getAuth(data.getAuthToken());
             game = Server.gameDAO.getGame(data.getGameID());
-            color = data.getTeamColor();
-            if (color == null) {
-                throw new RuntimeException();
-            }
+
+
         } catch (Exception e) {
             clientError(session);
             return;
         }
 
-        Server.sessions.put(session, -1);
+
         MessageExtension message = new MessageExtension(
                 ServerMessage.ServerMessageType.NOTIFICATION,
                 data.getUsername() + " has resigned."
         );
         try {
-            sendMessagetoGame(session, message, false);
+            sendMessagetoGame(session, message, true);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -156,6 +154,25 @@ public class WebSocketHandler {
             authData = Server.authDAO.getAuth(data.getAuthToken());
             game = Server.gameDAO.getGame(data.getGameID());
             color = data.getTeamColor();
+            System.out.println(data);
+            String username = authData.username();
+                if (game.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
+                    if (!Objects.equals(game.whiteUsername(), username)) {
+                        System.out.println("white user does not match");
+                        throw new RuntimeException();
+                    }
+                    System.out.println("white user did match");
+                } else {
+                    if (!Objects.equals(game.blackUsername(), username)) {
+                        System.out.println("black user does not match");
+                        throw new RuntimeException();
+                    }
+                    System.out.println("black user did match");
+                }
+
+
+            game.game().makeMove(data.getChessMove());
+            Server.gameDAO.updateGame(game);
         } catch (Exception e) {
             clientError(session);
             return;
@@ -166,6 +183,7 @@ public class WebSocketHandler {
 
         String endPos = String.valueOf(data.getChessMove().getEndPosition().getRow());
         endPos += " " + String.valueOf(data.getChessMove().getEndPosition().getColumn());
+
         MessageExtension loadGameMessage = new MessageExtension(
                 ServerMessage.ServerMessageType.LOAD_GAME,
                 game
@@ -202,11 +220,10 @@ public class WebSocketHandler {
             }
             if (serverSession == session) {
                 if (!all) {
-                    System.out.println("nah");
                     continue;
                 }
             }
-            System.out.println("passed all checks, sending");
+
             sendMessage(serverSession, message);
         }
     }

@@ -34,7 +34,8 @@ public class CommandExtension extends UserGameCommand{
     @Override
     public String toString() {
         return "CommandExtension{" +
-                "color=" + playerColor +
+                "username='" + username + '\'' +
+                ", playerColor=" + playerColor +
                 ", move=" + move +
                 '}';
     }

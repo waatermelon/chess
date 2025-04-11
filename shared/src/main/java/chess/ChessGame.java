@@ -86,7 +86,6 @@ public class ChessGame {
         }
         boolean correctTeam = getTeamTurn() == current.getTeamColor();
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
-        System.out.println(move);
         /*
         restraints:
         - piece exists
