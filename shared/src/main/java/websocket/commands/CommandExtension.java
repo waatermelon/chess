@@ -6,21 +6,21 @@ import chess.ChessMove;
 public class CommandExtension extends UserGameCommand{
 
     String username;
-    TeamColor color;
+    TeamColor playerColor;
     ChessMove move;
 
     public CommandExtension(
             CommandType type, String authToken, int gameID,
-            String username, TeamColor color, ChessMove move)
+            String username, TeamColor playerColor, ChessMove move)
     {
         super(type, authToken, gameID);
         this.username = username;
-        this.color = color;
+        this.playerColor = playerColor;
         this.move = move;
     }
 
     public TeamColor getTeamColor() {
-        return color;
+        return playerColor;
     }
 
     public ChessMove getChessMove() {
@@ -34,7 +34,7 @@ public class CommandExtension extends UserGameCommand{
     @Override
     public String toString() {
         return "CommandExtension{" +
-                "color=" + color +
+                "color=" + playerColor +
                 ", move=" + move +
                 '}';
     }

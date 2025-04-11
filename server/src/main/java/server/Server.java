@@ -51,6 +51,7 @@ public class Server {
     }
 
     public void stop() {
+        sessions = new ConcurrentHashMap<>();
         Spark.stop();
         Spark.awaitStop();
     }
@@ -60,6 +61,7 @@ public class Server {
             authHandler.clear();
             userHandler.clear();
             gameHandler.clear();
+            sessions = new ConcurrentHashMap<>();
         } catch (Exception e) {
             System.out.println("error server on clear");
         }
@@ -69,6 +71,7 @@ public class Server {
         authHandler.clear();
         gameHandler.clear();
         userHandler.clear();
+        sessions = new ConcurrentHashMap<>();
         response.status(200);
         return "{}";
     }

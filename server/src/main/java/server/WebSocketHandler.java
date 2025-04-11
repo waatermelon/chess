@@ -22,17 +22,14 @@ public class WebSocketHandler {
 
     @OnWebSocketConnect
     public void onConnect(Session session) {
-        System.out.println("Connected: " + session);
     }
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        System.out.println("Closed: " + session + ", code: " + statusCode + ", reason: " + reason);
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
-        System.out.println("Received message from " + session + ": " + message);
         CommandExtension data = serializer.fromJson(message, CommandExtension.class);
         switch (data.getCommandType()) {
             case UserGameCommand.CommandType.CONNECT -> playerJoin(session, data);
@@ -57,7 +54,6 @@ public class WebSocketHandler {
             return;
         }
 
-
         if (data.getTeamColor() != null) {
             // player
 
@@ -68,10 +64,11 @@ public class WebSocketHandler {
                     data.getUsername() + " joined the game as " +
                             data.getTeamColor().toString().toLowerCase() + "!"
             );
+
             try {
-                sendMessagetoGame(session, message);
+                sendMessagetoGame(session, message, false);
             } catch (IOException e) {
-                System.out.println(e);
+                System.out.println(e.getMessage());
             }
         } else {
             // viewer
@@ -82,10 +79,20 @@ public class WebSocketHandler {
                     data.getUsername() + " joined the game as a viewer!"
             );
             try {
-                sendMessagetoGame(session, message);
+                sendMessagetoGame(session, message, false);
             } catch (IOException e) {
-                System.out.println(e);
+                System.out.println(e.getMessage());
             }
+        }
+
+        MessageExtension loadGameMessage = new MessageExtension(
+                ServerMessage.ServerMessageType.LOAD_GAME,
+                game
+        );
+        try {
+            sendMessage(session, loadGameMessage);
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -103,9 +110,9 @@ public class WebSocketHandler {
                 data.getUsername() + " has left the game."
         );
         try {
-            sendMessagetoGame(session, message);
+            sendMessagetoGame(session, message, false);
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
         Server.sessions.put(session, -1);
     }
@@ -133,30 +140,48 @@ public class WebSocketHandler {
                 data.getUsername() + " has resigned."
         );
         try {
-            sendMessagetoGame(session, message);
+            sendMessagetoGame(session, message, false);
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
     private void move(Session session, CommandExtension data) {
         //TODO Implementation for processing a move
-        Server.sessions.put(session, -1);
+        AuthData authData;
+        GameData game;
+        ChessGame.TeamColor color;
+
+        try {
+            authData = Server.authDAO.getAuth(data.getAuthToken());
+            game = Server.gameDAO.getGame(data.getGameID());
+            color = data.getTeamColor();
+        } catch (Exception e) {
+            clientError(session);
+            return;
+        }
 
         String startPos = String.valueOf(data.getChessMove().getStartPosition().getRow());
         startPos += " " + String.valueOf(data.getChessMove().getStartPosition().getColumn());
 
         String endPos = String.valueOf(data.getChessMove().getEndPosition().getRow());
         endPos += " " + String.valueOf(data.getChessMove().getEndPosition().getColumn());
-
+        MessageExtension loadGameMessage = new MessageExtension(
+                ServerMessage.ServerMessageType.LOAD_GAME,
+                game
+        );
         MessageExtension message = new MessageExtension(
                 ServerMessage.ServerMessageType.NOTIFICATION,
                 data.getUsername() + " moved " + startPos + " to " + endPos + "."
         );
+
         try {
-            sendMessagetoGame(session, message);
+            System.out.println("BEFORE SENDS");
+            sendMessagetoGame(session, loadGameMessage, true);
+            sendMessagetoGame(session, message, false);
+
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -164,9 +189,11 @@ public class WebSocketHandler {
         session.getRemote().sendString(serializer.toJson(message));
     }
 
-    private void sendMessagetoGame(Session session, ServerMessage message) throws IOException {
+    private void sendMessagetoGame(Session session, ServerMessage message, boolean all)
+            throws IOException {
 
         for (Session serverSession : Server.sessions.keySet()) {
+            System.out.println("server session: " + Server.sessions.get(serverSession) + " : " + Server.sessions.get(session));
             if (Server.sessions.get(serverSession) == -1) {
                 continue;
             }
@@ -174,9 +201,12 @@ public class WebSocketHandler {
                 continue;
             }
             if (serverSession == session) {
-                continue;
+                if (!all) {
+                    System.out.println("nah");
+                    continue;
+                }
             }
-
+            System.out.println("passed all checks, sending");
             sendMessage(serverSession, message);
         }
     }
