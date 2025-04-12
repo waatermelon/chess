@@ -215,7 +215,23 @@ public class WebSocketHandler {
         ChessPosition endPosition = data.getChessMove().getEndPosition();
         String startPos = posToChessPos(startPosition);
         String endPos = posToChessPos(endPosition);
-
+        MessageExtension gameStateMessage = null;
+        if (game.game().isInCheck(data.getTeamColor())) {
+            gameStateMessage = new MessageExtension(
+                    ServerMessage.ServerMessageType.NOTIFICATION,
+                    data.getUsername() + " has played a check."
+            );
+        } else if(game.game().isInCheckmate(data.getTeamColor())) {
+            gameStateMessage = new MessageExtension(
+                    ServerMessage.ServerMessageType.NOTIFICATION,
+                    data.getUsername() + " has checkmated and won the match."
+            );
+        } else if(game.game().isInStalemate(data.getTeamColor())) {
+            gameStateMessage = new MessageExtension(
+                    ServerMessage.ServerMessageType.NOTIFICATION,
+                    data.getUsername() + " has stalemated the match."
+            );
+        }
         MessageExtension loadGameMessage = new MessageExtension(
                 ServerMessage.ServerMessageType.LOAD_GAME,
                 game
@@ -229,6 +245,9 @@ public class WebSocketHandler {
             sendMessagetoGame(session, loadGameMessage, true);
             sendMessagetoGame(session, message, false);
 
+            if (gameStateMessage != null) {
+                sendMessagetoGame(session, gameStateMessage, false);
+            }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

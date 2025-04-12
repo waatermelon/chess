@@ -419,7 +419,6 @@ public class ChessLoop {
     }
 
     private void runResign(String[] args) {
-        //TODO
         System.out.println("Are you sure you want to exit? "+
                 "(enter \"confirm\" to resign))\n [LOGGED IN] >>> ");
         String[] newArgs = getInput();
