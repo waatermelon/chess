@@ -2,7 +2,9 @@ package server;
 
 import chess.ChessGame;
 import chess.ChessPosition;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -50,7 +52,7 @@ public class WebSocketHandler {
             authData = Server.authDAO.getAuth(data.getAuthToken());
             game = Server.gameDAO.getGame(data.getGameID());
         } catch (Exception e) {
-            clientError(session);
+            clientError(session, "Please try joining as a different color or a different game.");
             return;
         }
 
@@ -113,12 +115,8 @@ public class WebSocketHandler {
 
                 Server.gameDAO.updateGame(newGame);
             }
-
-
-
-        } catch (Exception e) {
-            clientError(session);
-            return;
+        } catch (DataAccessException e) {
+            System.out.println("Unable to leave, please type \"help\" for a list of commands.");
         }
 
         MessageExtension message = new MessageExtension(
@@ -143,15 +141,21 @@ public class WebSocketHandler {
             String username = authData.username();
 
             if (game.game().getGameFinished()) {
-                throw new RuntimeException();
+                throw new ArithmeticException();
             }
             if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
                 throw new RuntimeException();
             }
             game.game().setGameFinished(true);
             Server.gameDAO.updateGame(game);
-        } catch (Exception e) {
-            clientError(session);
+        } catch (ArithmeticException e) {
+            clientError(session, "Game has already finished.");
+            return;
+        } catch (RuntimeException e) {
+            clientError(session, "Viewers are unable to resign. Use \"leave\" to exit match.");
+            return;
+        } catch (DataAccessException e) {
+            clientError(session, "Game is not able to be resigned from.");
             return;
         }
 
@@ -195,8 +199,15 @@ public class WebSocketHandler {
 
             game.game().makeMove(data.getChessMove());
             Server.gameDAO.updateGame(game);
-        } catch (Exception e) {
-            clientError(session);
+        } catch (RuntimeException e) {
+            clientError(session, "It is currently your opponents turn.");
+            return;
+        } catch (InvalidMoveException e) {
+            clientError(session, "Illegal move, please enter "+
+                    "\"preview\" to see possible moves.");
+            return;
+        } catch (DataAccessException e) {
+            clientError(session, "Move disallowed");
             return;
         }
 
@@ -253,9 +264,9 @@ public class WebSocketHandler {
         }
     }
 
-    private void clientError(Session session){
+    private void clientError(Session session, String errorMessage){
         MessageExtension message = new MessageExtension(
-                ServerMessage.ServerMessageType.ERROR, null, "Error"
+                ServerMessage.ServerMessageType.ERROR, null, "Error: " + errorMessage
         );
         try {
             sendMessage(session, message);
