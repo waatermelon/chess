@@ -174,11 +174,13 @@ public class WebSocketHandler {
     private void move(Session session, CommandExtension data) {
         AuthData authData;
         GameData game;
+        ChessGame.TeamColor color = null;
 
         try {
             authData = Server.authDAO.getAuth(data.getAuthToken());
             game = Server.gameDAO.getGame(data.getGameID());
             String username = authData.username();
+
             if (game.game().getGameFinished()) {
                 throw new RuntimeException();
             }
@@ -188,14 +190,15 @@ public class WebSocketHandler {
                     throw new RuntimeException();
                 }
                 System.out.println("white user did match");
+                color = ChessGame.TeamColor.WHITE;
             } else {
                 if (!Objects.equals(game.blackUsername(), username)) {
                     System.out.println("black user does not match");
                     throw new RuntimeException();
                 }
                 System.out.println("black user did match");
+                color = ChessGame.TeamColor.BLACK;
             }
-
 
             game.game().makeMove(data.getChessMove());
             Server.gameDAO.updateGame(game);
@@ -216,17 +219,17 @@ public class WebSocketHandler {
         String startPos = posToChessPos(startPosition);
         String endPos = posToChessPos(endPosition);
         MessageExtension gameStateMessage = null;
-        if (game.game().isInCheck(data.getTeamColor())) {
+        if (game.game().isInCheck(color)) {
             gameStateMessage = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
                     data.getUsername() + " has played a check."
             );
-        } else if(game.game().isInCheckmate(data.getTeamColor())) {
+        } else if(game.game().isInCheckmate(color)) {
             gameStateMessage = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
                     data.getUsername() + " has checkmated and won the match."
             );
-        } else if(game.game().isInStalemate(data.getTeamColor())) {
+        } else if(game.game().isInStalemate(color)) {
             gameStateMessage = new MessageExtension(
                     ServerMessage.ServerMessageType.NOTIFICATION,
                     data.getUsername() + " has stalemated the match."
@@ -240,11 +243,9 @@ public class WebSocketHandler {
                 ServerMessage.ServerMessageType.NOTIFICATION,
                 data.getUsername() + " moved " + startPos + " to " + endPos + "."
         );
-
         try {
             sendMessagetoGame(session, loadGameMessage, true);
             sendMessagetoGame(session, message, false);
-
             if (gameStateMessage != null) {
                 sendMessagetoGame(session, gameStateMessage, false);
             }
