@@ -59,14 +59,17 @@ public class WebSocketClient extends Endpoint {
 
     private void printLoad(MessageExtension data) {
         loop.currentGame = data.getGameData();
+
         BoardPrinter boardPrinter = new BoardPrinter();
         System.out.println();
         boardPrinter.printBoard(loop.currentGame, loop.currentColor);
-        System.out.println("[LOGGED IN] >>> ");
+        if (data.getLastMessage()) {
+            System.out.print("[LOGGED IN] >>> ");
+        }
     }
 
     private void printError(String errorMessage) {
-        System.out.print("\nThere was an Error. Please continue.\n[LOGGED_IN] >>> ");
+        System.out.print("\n" + errorMessage + "\n[LOGGED IN] >>> ");
     }
 
     public void sendMessage(String message) {
@@ -82,6 +85,9 @@ public class WebSocketClient extends Endpoint {
     }
 
     private void printMessage(String message) {
+        if (message.isEmpty()) {
+            return;
+        }
         System.out.print("\n" + message + "\n[LOGGED_IN] >>> ");
 
     }

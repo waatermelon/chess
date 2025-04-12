@@ -6,6 +6,7 @@ public class MessageExtension extends ServerMessage{
 
     String message;
     String errorMessage;
+    boolean lastMessage;
     GameData game;
 
     public MessageExtension(ServerMessageType type, String message) {
@@ -20,9 +21,10 @@ public class MessageExtension extends ServerMessage{
         this.errorMessage = errorMessage;
     }
 
-    public MessageExtension(ServerMessageType type, GameData game) {
+    public MessageExtension(ServerMessageType type, GameData game, boolean lastMessage) {
         super(type);
         this.game = game;
+        this.lastMessage = lastMessage;
     }
 
     public String getMessage() {
@@ -35,5 +37,9 @@ public class MessageExtension extends ServerMessage{
 
     public GameData getGameData() {
         return game;
+    }
+
+    public boolean getLastMessage() {
+        return lastMessage;
     }
 }

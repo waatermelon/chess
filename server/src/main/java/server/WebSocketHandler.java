@@ -84,7 +84,8 @@ public class WebSocketHandler {
 
         MessageExtension loadGameMessage = new MessageExtension(
                 ServerMessage.ServerMessageType.LOAD_GAME,
-                game
+                game,
+                true
         );
         try {
             sendMessage(session, loadGameMessage);
@@ -175,14 +176,14 @@ public class WebSocketHandler {
         AuthData authData;
         GameData game;
         ChessGame.TeamColor color = null;
-
+        MessageExtension gameStateMessage = null;
         try {
             authData = Server.authDAO.getAuth(data.getAuthToken());
             game = Server.gameDAO.getGame(data.getGameID());
             String username = authData.username();
 
             if (game.game().getGameFinished()) {
-                throw new RuntimeException();
+                throw new IndexOutOfBoundsException();
             }
             if (game.game().getTeamTurn() == ChessGame.TeamColor.WHITE) {
                 if (!Objects.equals(game.whiteUsername(), username)) {
@@ -190,24 +191,54 @@ public class WebSocketHandler {
                     throw new RuntimeException();
                 }
                 System.out.println("white user did match");
-                color = ChessGame.TeamColor.WHITE;
+                color = ChessGame.TeamColor.BLACK;
             } else {
                 if (!Objects.equals(game.blackUsername(), username)) {
                     System.out.println("black user does not match");
                     throw new RuntimeException();
                 }
                 System.out.println("black user did match");
-                color = ChessGame.TeamColor.BLACK;
+                color = ChessGame.TeamColor.WHITE;
+
             }
 
             game.game().makeMove(data.getChessMove());
             Server.gameDAO.updateGame(game);
+            boolean endGame = false;
+            if (game.game().isInCheckmate(color)) {
+                gameStateMessage = new MessageExtension(
+                        ServerMessage.ServerMessageType.NOTIFICATION,
+                        data.getUsername() + " has checkmated and won the match."
+                );
+                endGame = true;
+            } else if(game.game().isInCheck(color)) {
+                gameStateMessage = new MessageExtension(
+                        ServerMessage.ServerMessageType.NOTIFICATION,
+                        data.getUsername() + " has played a check."
+                );
+            } else if(game.game().isInStalemate(color)) {
+                gameStateMessage = new MessageExtension(
+                        ServerMessage.ServerMessageType.NOTIFICATION,
+                        data.getUsername() + " has stalemated and tied the match."
+                );
+                endGame = true;
+            }
+
+            if (endGame) {
+                game.game().setGameFinished(true);
+                Server.gameDAO.updateGame(game);
+            }
+
+        } catch(IndexOutOfBoundsException e) {
+            clientError(session, "The game has been concluded, "+
+                    "and moves are unable to be made.");
+            return;
         } catch (RuntimeException e) {
-            clientError(session, "It is currently your opponents turn.");
+            clientError(session, "It is currently not your turn to make a move.");
             return;
         } catch (InvalidMoveException e) {
-            clientError(session, "Illegal move, please enter "+
-                    "\"preview\" to see possible moves.");
+            clientError(session, "Illegal move, please use the "+
+                    "\"preview\" command for possible moves.");
             return;
         } catch (DataAccessException e) {
             clientError(session, "Move disallowed");
@@ -218,36 +249,30 @@ public class WebSocketHandler {
         ChessPosition endPosition = data.getChessMove().getEndPosition();
         String startPos = posToChessPos(startPosition);
         String endPos = posToChessPos(endPosition);
-        MessageExtension gameStateMessage = null;
-        if (game.game().isInCheck(color)) {
-            gameStateMessage = new MessageExtension(
-                    ServerMessage.ServerMessageType.NOTIFICATION,
-                    data.getUsername() + " has played a check."
-            );
-        } else if(game.game().isInCheckmate(color)) {
-            gameStateMessage = new MessageExtension(
-                    ServerMessage.ServerMessageType.NOTIFICATION,
-                    data.getUsername() + " has checkmated and won the match."
-            );
-        } else if(game.game().isInStalemate(color)) {
-            gameStateMessage = new MessageExtension(
-                    ServerMessage.ServerMessageType.NOTIFICATION,
-                    data.getUsername() + " has stalemated the match."
-            );
-        }
+
+
         MessageExtension loadGameMessage = new MessageExtension(
                 ServerMessage.ServerMessageType.LOAD_GAME,
-                game
+                game,
+                false
+        );
+        MessageExtension loadGamePersonalMessage = new MessageExtension(
+                ServerMessage.ServerMessageType.LOAD_GAME,
+                game,
+                true
         );
         MessageExtension message = new MessageExtension(
                 ServerMessage.ServerMessageType.NOTIFICATION,
                 data.getUsername() + " moved " + startPos + " to " + endPos + "."
         );
         try {
-            sendMessagetoGame(session, loadGameMessage, true);
-            sendMessagetoGame(session, message, false);
+            sendMessagetoGame(session, loadGameMessage, false);
+            sendMessage(session, loadGamePersonalMessage);
+
             if (gameStateMessage != null) {
                 sendMessagetoGame(session, gameStateMessage, false);
+            } else {
+                sendMessagetoGame(session, message, false);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
