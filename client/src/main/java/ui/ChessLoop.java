@@ -419,10 +419,25 @@ public class ChessLoop {
     }
 
     private void runResign(String[] args) {
-        facade.sendMessage(
-                UserGameCommand.CommandType.RESIGN, currentGame.gameID(),
-                username, currentColor, null
-        );
+        //TODO
+        System.out.println("Are you sure you want to exit? "+
+                "(enter \"confirm\" to resign))\n [LOGGED IN] >>> ");
+        String[] newArgs = getInput();
+
+        if (newArgs.length < 1) {
+            System.out.println("No input detected, Aborting resignation.");
+            return;
+        }
+        if (newArgs[0].toLowerCase().equals("confirm")) {
+            System.out.println("You have resigned.");
+
+            facade.sendMessage(
+                    UserGameCommand.CommandType.RESIGN, currentGame.gameID(),
+                    username, currentColor, null
+            );
+        } else {
+            System.out.println("Confirmation was not detected, aborting resignation.");
+        }
     }
 
     private void runHighlight(String[] args) {
